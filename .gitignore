@@ -1,0 +1,10 @@
+.idea
+node_modules
+vendor
+
+custom/custom/*
+custom/pages/*
+
+storefront/*
+
+# ignore keep.txt from storefront ?
