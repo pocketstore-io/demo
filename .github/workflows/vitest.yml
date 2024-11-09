@@ -19,5 +19,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /var/www/demo/storefront
+            git pull
             bun install
             bun run test
