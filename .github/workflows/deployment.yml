@@ -18,7 +18,11 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd /var/www/demo/storefront
+            cd /var/www/demo
+            git pull
+            chmod u+x ./bin/extend.sh
+            ./bin/extend.sh
+            cd storefront
             git pull
             bun install
             bun run build
