@@ -1,7 +1,7 @@
 version: 2
 updates:
   # Configuration for Git submodules
-  - package-ecosystem: "submodules"
+  - package-ecosystem: "gitsubmodule"
     directory: "/"  # Update to the directory where the submodule is located
     schedule:
       interval: "daily" 
