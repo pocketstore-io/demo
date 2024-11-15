@@ -13,10 +13,10 @@ jobs:
       - name: SSH and Run Commands
         uses: appleboy/ssh-action@v0.1.5
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host: admin.pocketstore.io
           username: "root"  
           key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          port: 22
           script: |
             cd /var/www/demo
             git pull
