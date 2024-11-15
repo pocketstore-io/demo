@@ -1,5 +1,8 @@
 name: Create Release
 
+permissions:
+  contents: write  # Adjust permissions as needed
+
 on:
   push:
     tags:
