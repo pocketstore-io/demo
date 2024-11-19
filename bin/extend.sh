@@ -9,6 +9,9 @@ cp -R custom/pages/* storefront/pages/
 # layouts
 cp -R custom/layouts/* storefront/layouts/
 
+# public
+cp -R custom/public/* storefront/public/
+
 # plugins ?
 # server ?
 # tests ?

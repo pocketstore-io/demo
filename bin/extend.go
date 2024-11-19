@@ -79,6 +79,9 @@ func main() {
 	layoutsSrc := "custom/layouts"
 	layoutDsg := "storefront/layouts"
 
+	publicSrc := "custom/public"
+	publicDst := "storefront/public"
+
 	// Copy the components directory
 	err := copyDir(componentSrc, componentDst)
 	if err != nil {
@@ -102,4 +105,12 @@ func main() {
 		return
 	}
 	fmt.Println("Successfully copied layouts!")
+
+	// Copy the pages directory
+	err = copyDir(publicSrc, publicDst)
+	if err != nil {
+		fmt.Printf("Error copying public: %v\n", err)
+		return
+	}
+	fmt.Println("Successfully copied public!")
 }
