@@ -72,8 +72,12 @@ func main() {
 	// Define the source and destination directories for components and pages
 	componentSrc := "custom/components"
 	componentDst := "storefront/components"
+
 	pageSrc := "custom/pages"
 	pageDst := "storefront/pages"
+
+	layoutsSrc := "custom/layouts"
+	layoutDsg := "storefront/layouts"
 
 	// Copy the components directory
 	err := copyDir(componentSrc, componentDst)
@@ -90,4 +94,12 @@ func main() {
 		return
 	}
 	fmt.Println("Successfully copied pages!")
+
+	// Copy the pages directory
+	err = copyDir(layoutsSrc, layoutsDst)
+	if err != nil {
+		fmt.Printf("Error copying layouts: %v\n", err)
+		return
+	}
+	fmt.Println("Successfully copied layouts!")
 }
