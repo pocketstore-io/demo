@@ -13,8 +13,8 @@ jobs:
       - name: SSH and Run Commands
         uses: appleboy/ssh-action@v0.1.5
         with:
-          host: admin.pocketstore.io
-          username: "root"  
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }} 
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
