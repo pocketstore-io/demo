@@ -9,6 +9,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      TARGET_DIR: ${{ secrets.SSH_FOLDER }}  # You can set this to any directory, and make it dynamic as needed.
+
     steps:
       - name: SSH and Run Commands
         uses: appleboy/ssh-action@v0.1.5
@@ -18,7 +21,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            cd /var/www/demo
+            cd $TARGET_DIR
             git pull
             chmod u+x ./bin/extend.sh
             ./bin/extend.sh
