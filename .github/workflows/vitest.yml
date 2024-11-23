@@ -14,11 +14,11 @@ jobs:
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: "root"  
+          username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd /var/www/demo/storefront
+            cd ${{ secrets.SSH_FOLDER }}/storefront
             git pull
             bun install
             bun run test
