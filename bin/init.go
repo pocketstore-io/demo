@@ -33,10 +33,10 @@ func runCommand(command string, args []string, detached bool) error {
 func main() {
 	// Run the commands in sequence as per the provided script
 
-	// 1. Run ./bin/update.sh
-	err := runCommand("./bin/update.sh", nil, false)
+	// 1. Run ./bin/update.go
+	err := runCommand("go run ./bin/update.go", nil, false)
 	if err != nil {
-		fmt.Println("Error running ./bin/update.sh:", err)
+		fmt.Println("Error running ./bin/update.go:", err)
 		return
 	}
 
@@ -47,10 +47,10 @@ func main() {
 		return
 	}
 
-	// 3. Run ./bin/sync.sh
-	err = runCommand("./bin/sync.sh", nil, false)
+	// 3. Run ./bin/sync.go
+	err = runCommand("go run ./bin/sync.go", nil, false)
 	if err != nil {
-		fmt.Println("Error running ./bin/sync.sh:", err)
+		fmt.Println("Error running ./bin/sync.go:", err)
 		return
 	}
 
@@ -61,17 +61,10 @@ func main() {
 		return
 	}
 
-	// 5. Run composer update
-	err = runCommand("composer", []string{"update"}, false)
+	// 6. Run go run lang.go
+	err = runCommand("go run ./bin/lang.go", []string{"lang"}, false)
 	if err != nil {
-		fmt.Println("Error running composer update:", err)
-		return
-	}
-
-	// 6. Run robo lang
-	err = runCommand("robo", []string{"lang"}, false)
-	if err != nil {
-		fmt.Println("Error running robo lang:", err)
+		fmt.Println("Error running go run lang:", err)
 		return
 	}
 

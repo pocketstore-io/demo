@@ -10,6 +10,6 @@
 ## Update
 
 ```bash
-* * * * * cd /var/www/demo/storefront && ./bin/sync.sh
-* * * * * cd /var/www/demo/storefront && robo lang
+* * * * * cd /var/www/demo/storefront && go run ./bin/sync.go
+* * * * * cd /var/www/demo/storefront && go run ./bin/lang.go
 ```

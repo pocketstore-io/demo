@@ -19,8 +19,8 @@ jobs:
           script: |
             cd ${{ secrets.SSH_FOLDER }}
             git pull
-            chmod u+x ./bin/extend.sh
-            ./bin/extend.sh
+            chmod u+x ./bin/extend.go
+            gu run ./bin/extend.go
             cd storefront
             git pull
             bun install

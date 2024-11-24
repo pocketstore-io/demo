@@ -8,14 +8,14 @@ import (
 
 func main() {
 	// Path to the script to execute
-	scriptToRun := "./bin/extend.sh"
+	scriptToRun := "./bin/extend.go"
 
 	// Time debounce in seconds
 	debounceTime := 5 * time.Second
 
 	for {
 		// Execute the script
-		cmd := exec.Command("bash", scriptToRun)
+		cmd := exec.Command("go run", scriptToRun)
 
 		// Run the command and capture any errors
 		if err := cmd.Run(); err != nil {
