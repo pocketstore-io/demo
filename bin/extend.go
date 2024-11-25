@@ -86,31 +86,35 @@ func main() {
 	err := copyDir(componentSrc, componentDst)
 	if err != nil {
 		fmt.Printf("Error copying components: %v\n", err)
-		return
 	}
-	fmt.Println("Successfully copied components!")
+	else {
+		fmt.Println("Successfully copied components!")
+	}
 
 	// Copy the pages directory
 	err = copyDir(pageSrc, pageDst)
 	if err != nil {
 		fmt.Printf("Error copying pages: %v\n", err)
-		return
 	}
-	fmt.Println("Successfully copied pages!")
+	else {
+		fmt.Println("Successfully copied pages!")
+	}
 
 	// Copy the pages directory
 	err = copyDir(layoutsSrc, layoutsDst)
 	if err != nil {
 		fmt.Printf("Error copying layouts: %v\n", err)
-		return
 	}
-	fmt.Println("Successfully copied layouts!")
+	else {
+		fmt.Println("Successfully copied layouts!")
+	}
 
 	// Copy the pages directory
 	err = copyDir(publicSrc, publicDst)
 	if err != nil {
 		fmt.Printf("Error copying public: %v\n", err)
-		return
 	}
-	fmt.Println("Successfully copied public!")
+	else {
+		fmt.Println("Successfully copied public!")
+	}
 }
