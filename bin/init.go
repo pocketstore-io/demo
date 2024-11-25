@@ -4,37 +4,45 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
-// runCommand runs a command and returns any error
+// runCommand runs a command with optional arguments and detached mode.
+// If `detached` is true, the command runs in the background.
 func runCommand(command string, args []string, detached bool) error {
 	cmd := exec.Command(command, args...)
+
+	// Handle detached mode for background execution
 	if detached {
-		// Run the command in detached mode (background)
 		cmd.Stdout = nil
 		cmd.Stderr = nil
-		err := cmd.Start()
-		if err != nil {
+		if err := cmd.Start(); err != nil {
 			return fmt.Errorf("failed to run command '%s %s' in detached mode: %w", command, strings.Join(args, " "), err)
 		}
-	} else {
-		// Run the command and wait for it to finish
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err := cmd.Run()
-		if err != nil {
-			return fmt.Errorf("failed to run command '%s %s': %w", command, strings.Join(args, " "), err)
-		}
+		return nil // Detached commands don't block, so we return early
 	}
+
+	// Attach stdout and stderr for visible output
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to run command '%s %s': %w", command, strings.Join(args, " "), err)
+	}
+
 	return nil
 }
 
 func main() {
-	// Run the commands in sequence as per the provided script
+	// Store the initial directory to return later
+	initialDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error getting the current directory:", err)
+		return
+	}
 
 	// 1. Run ./bin/update.go
-	err := runCommand("go run ./bin/update.go", nil, false)
+	err = runCommand("go", []string{"run", filepath.Join(".", "bin", "update.go")}, false)
 	if err != nil {
 		fmt.Println("Error running ./bin/update.go:", err)
 		return
@@ -48,7 +56,7 @@ func main() {
 	}
 
 	// 3. Run ./bin/sync.go
-	err = runCommand("go run ./bin/sync.go", nil, false)
+	err = runCommand("go", []string{"run", filepath.Join(".", "bin", "sync.go")}, false)
 	if err != nil {
 		fmt.Println("Error running ./bin/sync.go:", err)
 		return
@@ -61,36 +69,36 @@ func main() {
 		return
 	}
 
-	// 6. Run go run lang.go
-	err = runCommand("go run ./bin/lang.go", []string{"lang"}, false)
+	// 5. Run go run lang.go
+	err = runCommand("go", []string{"run", filepath.Join(".", "bin", "lang.go"), "lang"}, false)
 	if err != nil {
-		fmt.Println("Error running go run lang:", err)
+		fmt.Println("Error running go run lang.go:", err)
 		return
 	}
 
-	// 7. Run bun run build
+	// 6. Run bun run build
 	err = runCommand("bun", []string{"run", "build"}, false)
 	if err != nil {
 		fmt.Println("Error running bun run build:", err)
 		return
 	}
 
-	// 8. Run pm2 start ecosystem.config.cjs
+	// 7. Run pm2 start ecosystem.config.cjs
 	err = runCommand("pm2", []string{"start", "ecosystem.config.cjs"}, false)
 	if err != nil {
-		fmt.Println("Error running pm2 start:", err)
+		fmt.Println("Error running pm2 start ecosystem.config.cjs:", err)
 		return
 	}
 
-	// 9. Change directory back to the original path
-	err = os.Chdir("..")
+	// 8. Change directory back to the original path
+	err = os.Chdir(initialDir)
 	if err != nil {
 		fmt.Println("Error changing back to the original directory:", err)
 		return
 	}
 
-	// 10. Run ./pocketbase serve in detached mode
-	err = runCommand("./pocketbase", []string{"serve"}, true)
+	// 9. Run ./pocketbase serve in detached mode
+	err = runCommand(filepath.Join(".", "pocketbase"), []string{"serve"}, true)
 	if err != nil {
 		fmt.Println("Error running ./pocketbase serve:", err)
 		return
