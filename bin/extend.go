@@ -11,18 +11,22 @@ import (
 func copyFile(src, dst string) error {
 	input, err := os.Open(src)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open source file %s: %w", src, err)
 	}
 	defer input.Close()
 
 	output, err := os.Create(dst)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create destination file %s: %w", dst, err)
 	}
 	defer output.Close()
 
 	_, err = io.Copy(output, input)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to copy file from %s to %s: %w", src, dst, err)
+	}
+
+	return nil
 }
 
 // copyDir recursively copies a directory from src to dst
@@ -30,19 +34,19 @@ func copyDir(src, dst string) error {
 	// Get the properties of the source directory
 	srcInfo, err := os.Stat(src)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get properties of source directory %s: %w", src, err)
 	}
 
 	// Create the destination directory
 	err = os.MkdirAll(dst, srcInfo.Mode())
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create destination directory %s: %w", dst, err)
 	}
 
 	// Read the contents of the source directory
 	entries, err := os.ReadDir(src)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to read contents of source directory %s: %w", src, err)
 	}
 
 	// Loop through each entry in the source directory
@@ -52,15 +56,13 @@ func copyDir(src, dst string) error {
 
 		if entry.IsDir() {
 			// Recursively copy subdirectories
-			err := copyDir(srcPath, dstPath)
-			if err != nil {
-				return err
+			if err := copyDir(srcPath, dstPath); err != nil {
+				fmt.Printf("Error copying directory %s: %v\n", srcPath, err)
 			}
 		} else {
 			// Copy individual files
-			err := copyFile(srcPath, dstPath)
-			if err != nil {
-				return err
+			if err := copyFile(srcPath, dstPath); err != nil {
+				fmt.Printf("Error copying file %s: %v\n", srcPath, err)
 			}
 		}
 	}
@@ -69,52 +71,27 @@ func copyDir(src, dst string) error {
 }
 
 func main() {
-	// Define the source and destination directories for components and pages
-	componentSrc := "custom/components"
-	componentDst := "storefront/components"
-
-	pageSrc := "custom/pages"
-	pageDst := "storefront/pages"
-
-	layoutsSrc := "custom/layouts"
-	layoutsDst := "storefront/layouts"
-
-	publicSrc := "custom/public"
-	publicDst := "storefront/public"
-
-	// Copy the components directory
-	err := copyDir(componentSrc, componentDst)
-	if err != nil {
-		fmt.Printf("Error copying components: %v\n", err)
-	}
-	else {
-		fmt.Println("Successfully copied components!")
+	// Define the source and destination directories
+	directories := []struct {
+		Source      string
+		Destination string
+		Name        string
+	}{
+		{"custom/components", "storefront/components", "components"},
+		{"custom/pages", "storefront/pages", "pages"},
+		{"custom/layouts", "storefront/layouts", "layouts"},
+		{"custom/public", "storefront/public", "public"},
 	}
 
-	// Copy the pages directory
-	err = copyDir(pageSrc, pageDst)
-	if err != nil {
-		fmt.Printf("Error copying pages: %v\n", err)
-	}
-	else {
-		fmt.Println("Successfully copied pages!")
-	}
-
-	// Copy the pages directory
-	err = copyDir(layoutsSrc, layoutsDst)
-	if err != nil {
-		fmt.Printf("Error copying layouts: %v\n", err)
-	}
-	else {
-		fmt.Println("Successfully copied layouts!")
+	// Iterate through each source-destination pair and copy directories
+	for _, dir := range directories {
+		fmt.Printf("Copying %s...\n", dir.Name)
+		if err := copyDir(dir.Source, dir.Destination); err != nil {
+			fmt.Printf("Error copying %s: %v\n", dir.Name, err)
+		} else {
+			fmt.Printf("Successfully copied %s!\n", dir.Name)
+		}
 	}
 
-	// Copy the pages directory
-	err = copyDir(publicSrc, publicDst)
-	if err != nil {
-		fmt.Printf("Error copying public: %v\n", err)
-	}
-	else {
-		fmt.Println("Successfully copied public!")
-	}
+	fmt.Println("All copy operations completed.")
 }
