@@ -77,7 +77,7 @@ func main() {
 	pageDst := "storefront/pages"
 
 	layoutsSrc := "custom/layouts"
-	layoutDsg := "storefront/layouts"
+	layoutsDst := "storefront/layouts"
 
 	publicSrc := "custom/public"
 	publicDst := "storefront/public"
