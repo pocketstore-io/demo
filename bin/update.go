@@ -27,21 +27,21 @@ func main() {
 		return
 	}
 
-	// 2. Optionally run git submodule foreach git fetch
-	// Uncomment the lines below to fetch updates for all submodules
-	// err = runCommand("git", []string{"submodule", "foreach", "git", "fetch"})
-	// if err != nil {
-	// 	fmt.Println("Error fetching for submodules:", err)
-	// 	return
-	// }
+	2. Optionally run git submodule foreach git fetch
+	Uncomment the lines below to fetch updates for all submodules
+	err = runCommand("git", []string{"submodule", "foreach", "git", "checkout", "main"})
+	if err != nil {
+		fmt.Println("Error fetching for submodules:", err)
+		return
+	}
 
-	// 3. Optionally run git submodule foreach git pull
-	// Uncomment the lines below to pull the latest changes for each submodule
-	// err = runCommand("git", []string{"submodule", "foreach", "git", "pull"})
-	// if err != nil {
-	// 	fmt.Println("Error pulling for submodules:", err)
-	// 	return
-	// }
+	3. Optionally run git submodule foreach git pull
+	Uncomment the lines below to pull the latest changes for each submodule
+	err = runCommand("git", []string{"submodule", "foreach", "git", "pull"})
+	if err != nil {
+		fmt.Println("Error pulling for submodules:", err)
+		return
+	}
 
 	fmt.Println("Submodules updated successfully.")
 }
