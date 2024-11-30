@@ -93,5 +93,15 @@ func main() {
 		}
 	}
 
+	// Copy the pocketstore.json file
+	srcFile := "custom/pocketstore.json"
+	dstFile := "storefront/pocketstore.json"
+	fmt.Println("Copying pocketstore.json...")
+	if err := copyFile(srcFile, dstFile); err != nil {
+		fmt.Printf("Error copying pocketstore.json: %v\n", err)
+	} else {
+		fmt.Println("Successfully copied pocketstore.json!")
+	}
+
 	fmt.Println("All copy operations completed.")
 }
