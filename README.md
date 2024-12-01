@@ -20,7 +20,7 @@ git clone https://github.com/pocketstore-io/demo.git
 ```
 
 ```bash
-cd demo && chmod u+x ./bin/init.go
+cd demo
 ```
 
 ```bash
