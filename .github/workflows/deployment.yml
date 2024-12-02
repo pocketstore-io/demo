@@ -23,6 +23,6 @@ jobs:
             go run ./bin/extend.go
             cd storefront
             git pull
-            bun install
-            bun run build
-            bun x pm2 restart ecosystem.config.cjs
+            npm install
+            npm run build
+            pm2 restart ecosystem.config.cjs
