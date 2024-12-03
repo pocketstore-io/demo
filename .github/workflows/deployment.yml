@@ -17,6 +17,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
             cd ${{ secrets.SSH_FOLDER }}
             git pull
             chmod u+x ./bin/extend.go
