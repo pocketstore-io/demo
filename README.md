@@ -1,11 +1,33 @@
 # PocketStore - Demo Template
 
-### to run the Demo Store on you own Server execute
+## Packages
 
-![image](https://img.shields.io/badge/ChatGPT-74aa9c?style=for-the-badge&logo=openai&logoColor=white)
-![image](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
-![image](https://img.shields.io/badge/HetznerCloud-D50C2D?style=for-the-badge&logo=hetzner&logoColor=white)
-![image](https://img.shields.io/badge/VSCode-0078D4?style=for-the-badge&logo=visual%20studio%20code&logoColor=white)
+![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/storefront.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/docs.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/pb_data.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/pb_migrations.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/pb_hooks.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/printer.svg)
+
+## Dependecies Storefront
+
+![](https://raw.githubusercontent.com/pocketstore-io/storefront/refs/heads/main/.github/badges/nuxt.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/storefront/refs/heads/main/.github/badges/vue.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/storefront/refs/heads/main/.github/badges/eslint.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/storefront/refs/heads/main/.github/badges/vite.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/storefront/refs/heads/main/.github/badges/daisyui.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/storefront/refs/heads/main/.github/badges/pinia.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/storefront/refs/heads/main/.github/badges/tailwindcss.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/storefront/refs/heads/main/.github/badges/pocketbase.svg)
+
+## Tools
+
+![](https://img.shields.io/badge/Hetzner+Cloud-Server-red)
+![](https://img.shields.io/badge/ChatGpt-Code+Support-red)
+![](https://img.shields.io/badge/VsCode-Editor-red)
+![](https://img.shields.io/badge/PhpStorm-Editor-red)
+
+## Get Started
 
 install the requirements under
 [www.PocketStore.io](https://www.PocketStore.io).
