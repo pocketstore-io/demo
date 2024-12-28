@@ -8,8 +8,6 @@ WORKDIR /var/www/demo
 RUN go run bin/update.go
 
 WORKDIR /var/www/demo/storefront
-RUN ls -la && exit 1
-RUN go run bin/lang.go
 RUN go run bin/lang.go
 
 # Install global dependencies
