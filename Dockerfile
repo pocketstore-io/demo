@@ -5,6 +5,7 @@ RUN apk add go
 # Set the working directory
 COPY . /var/www/demo
 WORKDIR /var/www/demo/storefront
+RUN ls -la && exit 1
 RUN go run bin/lang.go
 
 # Install global dependencies
