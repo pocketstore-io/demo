@@ -11,12 +11,12 @@ WORKDIR /var/www/demo/storefront
 RUN go run bin/lang.go
 
 # Install global dependencies
-RUN npm install -g pm2 bun npm
+RUN npm install -g pm2 npm
 
 # Install project dependencies
-RUN bun install && bun run build
+RUN npm install && npx nuxi build
 
 # Expose the desired port
-EXPOSE 3000
+EXPOSE 4000
 
-CMD ["bun", "run", "preview"]
+CMD ["npx", "nuxi", "preview"]
