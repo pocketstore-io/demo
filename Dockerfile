@@ -6,6 +6,7 @@ RUN apk add go git
 COPY . /var/www/demo
 WORKDIR /var/www/demo
 RUN go run bin/update.go
+RUN go run bin/extend.go
 
 WORKDIR /var/www/demo/storefront
 RUN go run bin/lang.go
