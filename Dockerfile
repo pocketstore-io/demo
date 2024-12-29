@@ -17,6 +17,6 @@ RUN npm install -g pm2 bun npm
 RUN bun install && bun run build
 
 # Expose the desired port
-EXPOSE 4000
+EXPOSE 3000
 
 CMD ["bun", "run", "preview"]
