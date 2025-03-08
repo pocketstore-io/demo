@@ -21,9 +21,3 @@
 	path = pb_migrations
 	url = https://github.com/pocketstore-io/pb_migrations.git
 	branch = main
-
-# Printer
-[submodule "printer"]
-	path = printer
-	url = https://github.com/pocketstore-io/printer.git
-	branch = main
