@@ -15,9 +15,9 @@ RUN go run bin/lang.go
 RUN npm install -g pm2 npm
 
 # Install project dependencies
-RUN npm install && npm run build
+RUN npm install
 
 # Expose the desired port
-EXPOSE 4000
+EXPOSE 3000
 
 CMD ["npx", "nuxi", "preview"]
