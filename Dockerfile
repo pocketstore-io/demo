@@ -15,7 +15,7 @@ RUN go run bin/lang.go
 RUN npm install -g pm2 npm
 
 # Install project dependencies
-RUN npm install && npx nuxi build
+RUN npm install && npm run build
 
 # Expose the desired port
 EXPOSE 4000
