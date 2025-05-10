@@ -75,12 +75,13 @@ func main() {
 	directories := []struct {
 		Source      string
 		Destination string
+		Storefront  string
 		Name        string
 	}{
-		{"custom/components", "storefront/components", "components"},
-		{"custom/pages", "storefront/pages", "pages"},
-		{"custom/layouts", "storefront/layouts", "layouts"},
-		{"custom/public", "storefront/public", "public"},
+		{"custom/components", "baseline/components", "baseline/components", "components"},
+		{"custom/pages", "baseline/pages", "storefront/pages", "pages"},
+		{"custom/layouts", "baseline/layouts", "storefront/layouts", "layouts"},
+		{"custom/public", "baseline/public", "storefront/public", "public"},
 	}
 
 	// Iterate through each source-destination pair and copy directories

@@ -10,12 +10,6 @@
 	url = https://github.com/pocketstore-io/pb_data.git
 	branch = main
 
-# Storefront, extendable by Custom
-[submodule "storefront"]
-	path = storefront
-	url = https://github.com/pocketstore-io/storefront.git
-	branch = main
-
 # PB Migrations
 [submodule "pb_migrations"]
 	path = pb_migrations
