@@ -46,7 +46,7 @@ cd demo
 ```
 
 ```bash
-go run ./bin/init.go
+go docker compose up
 ```
 
 This is our Demo Template for Demo.PocketStore.io
