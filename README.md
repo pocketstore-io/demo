@@ -7,7 +7,6 @@
 ![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/pb_data.svg)
 ![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/pb_migrations.svg)
 ![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/pb_hooks.svg)
-![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/printer.svg)
 
 ## Dependecies Storefront
 
