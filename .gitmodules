@@ -15,3 +15,12 @@
 	path = pb_migrations
 	url = https://github.com/pocketstore-io/pb_migrations.git
 	branch = main
+
+[submodule "baseline"]
+	path = baseline
+	url = https://github.com/pocketstore-io/storefront.git
+	branch = main
+[submodule "migrations"]
+	path = migrations
+	url = https://github.com/pocketstore-io/pb_migrations.git
+	branch = main
