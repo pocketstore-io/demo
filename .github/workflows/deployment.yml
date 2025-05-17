@@ -17,5 +17,14 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ${{ secrets.SSH_FOLDER }}
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+            cd /var/www/pocketstore-ikea
+            git pull
+            go run bin/extend.go
+            cd storefront
+            npm i
+            npm run build
+            cd ..
+            docker compose down
             docker compose up -d
