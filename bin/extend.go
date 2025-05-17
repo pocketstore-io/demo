@@ -90,7 +90,7 @@ func main() {
 	// Iterate through each source-destination pair and copy directories
 	for _, dir := range directories {
 		// Check if the source directory exists
-		if _, err := os.Stat(dir.Source); os.IsNotExist(err) {
+		if _, err := os.Stat(dir.Custom); os.IsNotExist(err) {
 			fmt.Printf("Skipping %s: directory does not exist.\n", dir.Name)
 			continue
 		}
