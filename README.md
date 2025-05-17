@@ -2,11 +2,7 @@
 
 ## Packages
 
-![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/storefront.svg)
-![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/docs.svg)
-![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/pb_data.svg)
-![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/pb_migrations.svg)
-![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/pb_hooks.svg)
+![](https://raw.githubusercontent.com/pocketstore-io/demo/refs/heads/main/.github/badges/baseline.svg)
 
 ## Dependecies Storefront
 
