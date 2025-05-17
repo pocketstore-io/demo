@@ -78,7 +78,7 @@ func main() {
 		Storefront  string
 		Name        string
 	}{
-		{"custom/components", "baseline/components", "baseline/components", "components"},
+		{"custom/components", "baseline/components", "storefront/components", "components"},
 		{"custom/pages", "baseline/pages", "storefront/pages", "pages"},
 		{"custom/layouts", "baseline/layouts", "storefront/layouts", "layouts"},
 		{"custom/public", "baseline/public", "storefront/public", "public"},
