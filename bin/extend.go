@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -84,15 +85,7 @@ func main() {
 		{"storefront/public", "baseline/public", "custom/public", "public"},
 	}
 
-	// Iterate through each source-destination pair and copy directories
-	for _, dir := range directories {
-		fmt.Printf("Copying %s...\n", dir.Name)
-		if err := copyDir(dir.Baseline, dir.Storefront); err != nil {
-			fmt.Printf("Error copying %s: %v\n", dir.Name, err)
-		} else {
-			fmt.Printf("Successfully copied %s!\n", dir.Name)
-		}
-	}
+	copyDir("baseline", "storefront")
 
 	// Iterate through each source-destination pair and copy directories
 	for _, dir := range directories {
@@ -112,6 +105,15 @@ func main() {
 		fmt.Printf("Error copying pocketstore.json: %v\n", err)
 	} else {
 		fmt.Println("Successfully copied pocketstore.json!")
+	}
+
+	cmd := exec.Command("go", "run", "bin/daisyui.go")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	err := cmd.Run()
+	if err != nil {
+		os.Exit(1)
 	}
 
 	fmt.Println("All copy operations completed.")
