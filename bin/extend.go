@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -73,15 +74,18 @@ func copyDir(src, dst string) error {
 func main() {
 	// Define other source and destination directories
 	directories := []struct {
-		Source      string
-		Destination string
-		Name        string
+		Storefront string
+		Baseline   string
+		Custom     string
+		Name       string
 	}{
-		{"custom/components", "storefront/components", "components"},
-		{"custom/pages", "storefront/pages", "pages"},
-		{"custom/layouts", "storefront/layouts", "layouts"},
-		{"custom/public", "storefront/public", "public"},
+		{"storefront/components", "baseline/components", "custom/components", "components"},
+		{"storefront/pages", "baseline/pages", "custom/pages", "pages"},
+		{"storefront/layouts", "baseline/layouts", "custom/layouts", "layouts"},
+		{"storefront/public", "baseline/public", "custom/public", "public"},
 	}
+
+	copyDir("baseline", "storefront")
 
 	// Iterate through each source-destination pair and copy directories
 	for _, dir := range directories {
@@ -92,7 +96,7 @@ func main() {
 		}
 
 		fmt.Printf("Copying %s...\n", dir.Name)
-		if err := copyDir(dir.Source, dir.Destination); err != nil {
+		if err := copyDir(dir.Baseline, dir.Storefront); err != nil {
 			fmt.Printf("Error copying %s: %v\n", dir.Name, err)
 		} else {
 			fmt.Printf("Successfully copied %s!\n", dir.Name)
@@ -111,6 +115,15 @@ func main() {
 		} else {
 			fmt.Println("Successfully copied pocketstore.json!")
 		}
+	}
+
+	cmd := exec.Command("go", "run", "bin/daisyui.go")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	err := cmd.Run()
+	if err != nil {
+		os.Exit(1)
 	}
 
 	fmt.Println("All copy operations completed.")

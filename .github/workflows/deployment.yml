@@ -15,16 +15,16 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }} 
           key: ${{ secrets.SSH_KEY }}
-          port: 22
+          port: ${{ secrets.SSH_PORT }}
           script: |
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
-            cd ${{ secrets.SSH_FOLDER }}
+            cd /var/www/pocketstore-ikea
             git pull
-            chmod u+x ./bin/extend.go
-            go run ./bin/extend.go
+            go run bin/extend.go
             cd storefront
-            git pull
-            bun install
-            bun run build
-            pm2 restart ecosystem.config.cjs
+            npm i
+            npm run build
+            cd ..
+            docker compose down
+            docker compose up -d
