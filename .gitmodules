@@ -1,27 +1,4 @@
-# Hooks
-[submodule "pb_hooks"]
-	path = pb_hooks
-	url = https://github.com/pocketstore-io/pb_hooks.git
-	branch = main
-
-# Data for Pocketbase
-[submodule "pb_data"]
-	path = pb_data
-	url = https://github.com/pocketstore-io/pb_data.git
-	branch = main
-
-# PB Migrations
-[submodule "pb_migrations"]
-	path = pb_migrations
-	url = https://github.com/pocketstore-io/pb_migrations.git
-	branch = main
-
 [submodule "baseline"]
 	path = baseline
 	url = https://github.com/pocketstore-io/storefront.git
-	branch = main
-	
-[submodule "migrations"]
-	path = migrations
-	url = https://github.com/pocketstore-io/pb_migrations.git
 	branch = main
