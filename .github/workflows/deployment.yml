@@ -19,7 +19,7 @@ jobs:
           script: |
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
-            cd /var/www/${{ secrets.FOLDER }}
+            cd /var/www/${{ secrets.SSH_FOLDER }}
             git pull
             go run bin/extend.go
             cd storefront
