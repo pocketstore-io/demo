@@ -19,7 +19,7 @@ jobs:
           script: |
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
-            cd /var/www/pocketstore-ikea
+            cd /var/www/${{ secrets.FOLDER }}
             git pull
             go run bin/extend.go
             cd storefront
