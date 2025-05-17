@@ -1059,6 +1059,19 @@
         "type": "text"
       },
       {
+        "cascadeDelete": false,
+        "collectionId": "k6mrcz91e2tprp0",
+        "hidden": false,
+        "id": "relation105650625",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "name": "category",
+        "presentable": false,
+        "required": true,
+        "system": false,
+        "type": "relation"
+      },
+      {
         "hidden": false,
         "id": "autodate2990389176",
         "name": "created",
