@@ -73,21 +73,31 @@ func copyDir(src, dst string) error {
 func main() {
 	// Define the source and destination directories
 	directories := []struct {
-		Source      string
-		Destination string
-		Storefront  string
-		Name        string
+		Storefront string
+		Baseline   string
+		Custom     string
+		Name       string
 	}{
-		{"custom/components", "baseline/components", "storefront/components", "components"},
-		{"custom/pages", "baseline/pages", "storefront/pages", "pages"},
-		{"custom/layouts", "baseline/layouts", "storefront/layouts", "layouts"},
-		{"custom/public", "baseline/public", "storefront/public", "public"},
+		{"storefront/components", "baseline/components", "custom/components", "components"},
+		{"storefront/pages", "baseline/pages", "custom/pages", "pages"},
+		{"storefront/layouts", "baseline/layouts", "custom/layouts", "layouts"},
+		{"storefront/public", "baseline/public", "custom/public", "public"},
 	}
 
 	// Iterate through each source-destination pair and copy directories
 	for _, dir := range directories {
 		fmt.Printf("Copying %s...\n", dir.Name)
-		if err := copyDir(dir.Source, dir.Destination); err != nil {
+		if err := copyDir(dir.Baseline, dir.Storefront); err != nil {
+			fmt.Printf("Error copying %s: %v\n", dir.Name, err)
+		} else {
+			fmt.Printf("Successfully copied %s!\n", dir.Name)
+		}
+	}
+
+	// Iterate through each source-destination pair and copy directories
+	for _, dir := range directories {
+		fmt.Printf("Copying %s...\n", dir.Name)
+		if err := copyDir(dir.Baseline, dir.Storefront); err != nil {
 			fmt.Printf("Error copying %s: %v\n", dir.Name, err)
 		} else {
 			fmt.Printf("Successfully copied %s!\n", dir.Name)
