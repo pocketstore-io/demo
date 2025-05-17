@@ -71,7 +71,7 @@ func copyDir(src, dst string) error {
 }
 
 func main() {
-	// Define the source and destination directories
+	// Define other source and destination directories
 	directories := []struct {
 		Source      string
 		Destination string
@@ -85,6 +85,12 @@ func main() {
 
 	// Iterate through each source-destination pair and copy directories
 	for _, dir := range directories {
+		// Check if the source directory exists
+		if _, err := os.Stat(dir.Source); os.IsNotExist(err) {
+			fmt.Printf("Skipping %s: directory does not exist.\n", dir.Name)
+			continue
+		}
+
 		fmt.Printf("Copying %s...\n", dir.Name)
 		if err := copyDir(dir.Source, dir.Destination); err != nil {
 			fmt.Printf("Error copying %s: %v\n", dir.Name, err)
@@ -93,14 +99,18 @@ func main() {
 		}
 	}
 
-	// Copy the pocketstore.json file
+	// Copy the pocketstore.json file if it exists
 	srcFile := "custom/pocketstore.json"
 	dstFile := "storefront/pocketstore.json"
-	fmt.Println("Copying pocketstore.json...")
-	if err := copyFile(srcFile, dstFile); err != nil {
-		fmt.Printf("Error copying pocketstore.json: %v\n", err)
+	if _, err := os.Stat(srcFile); os.IsNotExist(err) {
+		fmt.Println("Skipping pocketstore.json: file does not exist.")
 	} else {
-		fmt.Println("Successfully copied pocketstore.json!")
+		fmt.Println("Copying pocketstore.json...")
+		if err := copyFile(srcFile, dstFile); err != nil {
+			fmt.Printf("Error copying pocketstore.json: %v\n", err)
+		} else {
+			fmt.Println("Successfully copied pocketstore.json!")
+		}
 	}
 
 	fmt.Println("All copy operations completed.")
