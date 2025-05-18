@@ -1,4 +1,4 @@
-name: Deployment
+name: Deployment -stage
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - stage
 
 jobs:
-  deploy:
+  deploy_stage:
     runs-on: ubuntu-latest
     steps:
       - name: SSH and Run Commands
