@@ -9,6 +9,5 @@ node_modules
 # Ignore composer dependencies
 vendor
 
-# Ignore keep.md
-custom/components/keep.md
-custom/pages/keep.md
+pb_data
+pb_hooks
