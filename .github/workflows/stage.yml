@@ -1,0 +1,30 @@
+name: Deployment
+
+on:
+  push:
+    branches:
+      - stage
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH and Run Commands
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }} 
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+            cd /var/www/stage
+            git pull
+            go run bin/extend.go
+            cd storefront
+            npm i
+            npm run build
+            cd ..
+            docker compose down
+            docker compose -f docker-compose.stage.yml up -d

@@ -1,18 +1,18 @@
 services:
-  frontend_prod:
-    container_name: frontend_prod
+  frontend_stage:
+    container_name: frontend_stage
     build: .
     volumes:
       - .:/var/www/demo
     ports:
-      - "4000:3000"
+      - "5000:3000"
       
-  pocketbase_prod:
+  pocketbase_stage:
     image: ghcr.io/muchobien/pocketbase:latest
-    container_name: pocketbase_prod
+    container_name: pocketbase_stage
     restart: unless-stopped
     ports:
-      - "9090:8090"
+      - "8090:8090"
     healthcheck: # optional, recommended since v0.10.0
       test: wget --no-verbose --tries=1 --spider http://localhost:8090/api/health || exit 1
       interval: 5s
