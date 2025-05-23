@@ -3,128 +3,99 @@ package main
 import (
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
-	"os/exec"
 	"path/filepath"
 )
 
-// copyFile copies a single file from src to dst
-func copyFile(src, dst string) error {
-	input, err := os.Open(src)
-	if err != nil {
-		return fmt.Errorf("failed to open source file %s: %w", src, err)
-	}
-	defer input.Close()
-
-	output, err := os.Create(dst)
-	if err != nil {
-		return fmt.Errorf("failed to create destination file %s: %w", dst, err)
-	}
-	defer output.Close()
-
-	_, err = io.Copy(output, input)
-	if err != nil {
-		return fmt.Errorf("failed to copy file from %s to %s: %w", src, dst, err)
-	}
-
-	return nil
+// copyDir recursively copies a directory tree, attempting to preserve permissions.
+// Source directory must exist, destination directory will be created if necessary.
+func copyDir(src string, dst string) error {
+	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		relPath, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		targetPath := filepath.Join(dst, relPath)
+		if d.IsDir() {
+			return os.MkdirAll(targetPath, os.ModePerm)
+		}
+		return copyFile(path, targetPath)
+	})
 }
 
-// copyDir recursively copies a directory from src to dst
-func copyDir(src, dst string) error {
-	// Get the properties of the source directory
-	srcInfo, err := os.Stat(src)
+// copyFile copies a file from src to dst
+func copyFile(src, dst string) error {
+	srcFile, err := os.Open(src)
 	if err != nil {
-		return fmt.Errorf("failed to get properties of source directory %s: %w", src, err)
+		return err
 	}
+	defer srcFile.Close()
 
-	// Create the destination directory
-	err = os.MkdirAll(dst, srcInfo.Mode())
+	// Ensure destination directory exists
+	err = os.MkdirAll(filepath.Dir(dst), os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("failed to create destination directory %s: %w", dst, err)
+		return err
 	}
 
-	// Read the contents of the source directory
-	entries, err := os.ReadDir(src)
+	dstFile, err := os.Create(dst)
 	if err != nil {
-		return fmt.Errorf("failed to read contents of source directory %s: %w", src, err)
+		return err
 	}
+	defer dstFile.Close()
 
-	// Loop through each entry in the source directory
-	for _, entry := range entries {
-		srcPath := filepath.Join(src, entry.Name())
-		dstPath := filepath.Join(dst, entry.Name())
-
-		if entry.IsDir() {
-			// Recursively copy subdirectories
-			if err := copyDir(srcPath, dstPath); err != nil {
-				fmt.Printf("Error copying directory %s: %v\n", srcPath, err)
-			}
-		} else {
-			// Copy individual files
-			if err := copyFile(srcPath, dstPath); err != nil {
-				fmt.Printf("Error copying file %s: %v\n", srcPath, err)
-			}
-		}
+	_, err = io.Copy(dstFile, srcFile)
+	if err != nil {
+		return err
 	}
-
+	// Optionally, copy file mode
+	fi, err := srcFile.Stat()
+	if err == nil {
+		_ = os.Chmod(dst, fi.Mode())
+	}
 	return nil
 }
 
 func main() {
-	// Define other source and destination directories
-	directories := []struct {
-		Storefront string
-		Baseline   string
-		Custom     string
-		Name       string
-	}{
-		{"storefront/components", "baseline/components", "custom/components", "components"},
-		{"storefront/pages", "baseline/pages", "custom/pages", "pages"},
-		{"storefront/layouts", "baseline/layouts", "custom/layouts", "layouts"},
-		{"storefront/public", "baseline/public", "custom/public", "public"},
-	}
+	// Copy baseline -> storefront
+	baseline := "baseline"
+	storefront := "storefront"
+	custom := "custom"
 
-	copyDir("baseline", "storefront")
-
-	// Iterate through each source-destination pair and copy directories
-	for _, dir := range directories {
-		// Check if the source directory exists
-		if _, err := os.Stat(dir.Custom); os.IsNotExist(err) {
-			fmt.Printf("Skipping %s: directory does not exist.\n", dir.Name)
-			continue
-		}
-
-		fmt.Printf("Copying %s...\n", dir.Name)
-		if err := copyDir(dir.Baseline, dir.Storefront); err != nil {
-			fmt.Printf("Error copying %s: %v\n", dir.Name, err)
-		} else {
-			fmt.Printf("Successfully copied %s!\n", dir.Name)
-		}
-	}
-
-	// Copy the pocketstore.json file if it exists
-	srcFile := "custom/pocketstore.json"
-	dstFile := "storefront/pocketstore.json"
-	if _, err := os.Stat(srcFile); os.IsNotExist(err) {
-		fmt.Println("Skipping pocketstore.json: file does not exist.")
-	} else {
-		fmt.Println("Copying pocketstore.json...")
-		if err := copyFile(srcFile, dstFile); err != nil {
-			fmt.Printf("Error copying pocketstore.json: %v\n", err)
-		} else {
-			fmt.Println("Successfully copied pocketstore.json!")
-		}
-	}
-
-	cmd := exec.Command("go", "run", "bin/daisyui.go")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-	err := cmd.Run()
+	fmt.Println("Copying baseline to storefront...")
+	err := copyDir(baseline, storefront)
 	if err != nil {
-		os.Exit(1)
+		fmt.Printf("Error copying baseline: %v\n", err)
+		return
 	}
 
-	fmt.Println("All copy operations completed.")
+	// Override custom/public -> storefront/public
+	overrideDirs := []string{"public", "components", "pages", "layouts"}
+	for _, dir := range overrideDirs {
+		src := filepath.Join(custom, dir)
+		dst := filepath.Join(storefront, dir)
+		if _, err := os.Stat(src); err == nil {
+			fmt.Printf("Overriding %s -> %s...\n", src, dst)
+			err := copyDir(src, dst)
+			if err != nil {
+				fmt.Printf("Error overriding %s: %v\n", dir, err)
+			}
+		}
+	}
+
+	// Copy custom/pocketstore.json -> storefront/pocketstore.json if exists
+	pocketstoreSrc := filepath.Join(custom, "pocketstore.json")
+	pocketstoreDst := filepath.Join(storefront, "pocketstore.json")
+	if _, err := os.Stat(pocketstoreSrc); err == nil {
+		fmt.Println("Copying custom/pocketstore.json to storefront...")
+		err := copyFile(pocketstoreSrc, pocketstoreDst)
+		if err != nil {
+			fmt.Printf("Error copying pocketstore.json: %v\n", err)
+		}
+	}
+
+	fmt.Println("Copy complete.")
 }
