@@ -1,4 +1,4 @@
-name: Deployment -stage
+name: Deployment-stage
 
 on:
   push:
@@ -21,6 +21,7 @@ jobs:
             source ~/.nvm/nvm.sh
             cd /var/www/stage
             git pull
+            git checkout stage
             go run bin/extend.go
             cd storefront
             npm i
