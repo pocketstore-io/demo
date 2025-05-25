@@ -6,7 +6,7 @@ on:
       - develop
 
 jobs:
-  deploy_stage:
+  deploy_develop:
     runs-on: ubuntu-latest
     steps:
       - name: SSH and Run Commands
