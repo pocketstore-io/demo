@@ -5,7 +5,7 @@ services:
     volumes:
       - .:/var/www/demo
     ports:
-      - "5000:3000"
+      - "6010:3000"
       
   pocketbase_develop:
     image: ghcr.io/muchobien/pocketbase:latest

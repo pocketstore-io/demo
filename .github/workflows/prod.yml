@@ -20,6 +20,9 @@ jobs:
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             cd /var/www/${{ secrets.SSH_FOLDER }}
+            git fetch --tags
+            latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
+            git checkout $latestTag
             git pull
             go run bin/extend.go
             cd storefront
