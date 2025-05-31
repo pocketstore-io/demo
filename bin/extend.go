@@ -97,5 +97,16 @@ func main() {
 		}
 	}
 
+	// Copy custom/pocketstore.json -> storefront/pocketstore.json if exists
+	pocketstoreSrc = filepath.Join(custom, "daisyui.css")
+	pocketstoreDst = filepath.Join(storefront, "daisyui.css")
+	if _, err := os.Stat(pocketstoreSrc); err == nil {
+		fmt.Println("Copying baseline/daisyui.css to storefront...")
+		err := copyFile(pocketstoreSrc, pocketstoreDst)
+		if err != nil {
+			fmt.Printf("Error copying daisyui.css: %v\n", err)
+		}
+	}
+
 	fmt.Println("Copy complete.")
 }
