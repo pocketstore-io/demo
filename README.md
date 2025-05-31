@@ -41,7 +41,7 @@ cd demo
 ```
 
 ```bash
-go docker compose up
+docker compose up
 ```
 
 This is our Demo Template for Demo.PocketStore.io
