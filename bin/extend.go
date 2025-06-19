@@ -60,18 +60,19 @@ func copyFile(src, dst string) error {
 }
 
 func main() {
-	// Copy baseline -> storefront
 	baseline := "baseline"
 	storefront := "storefront"
 	custom := "custom"
+	targetConfig := filepath.Join(storefront, "nuxt.config.ts")
 
-	fmt.Println("Copying baseline to storefront...")
-	err := copyDir(baseline, storefront)
-	if err != nil {
-		fmt.Printf("Error copying baseline: %v\n", err)
-		return
+	if _, err := os.Stat(targetConfig); os.IsNotExist(err) {
+		fmt.Println("Copying baseline to storefront...")
+		err := copyDir(baseline, storefront)
+		if err != nil {
+			fmt.Printf("Error copying baseline: %v\n", err)
+			return
+		}
 	}
-
 	// Override custom/public -> storefront/public
 	overrideDirs := []string{"public", "components", "pages", "layouts"}
 	for _, dir := range overrideDirs {
