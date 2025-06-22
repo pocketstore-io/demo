@@ -60,18 +60,19 @@ func copyFile(src, dst string) error {
 }
 
 func main() {
-	// Copy baseline -> storefront
 	baseline := "baseline"
 	storefront := "storefront"
 	custom := "custom"
+	targetConfig := filepath.Join(storefront, "nuxt.config.ts")
 
-	fmt.Println("Copying baseline to storefront...")
-	err := copyDir(baseline, storefront)
-	if err != nil {
-		fmt.Printf("Error copying baseline: %v\n", err)
-		return
+	if _, err := os.Stat(targetConfig); os.IsNotExist(err) {
+		fmt.Println("Copying baseline to storefront...")
+		err := copyDir(baseline, storefront)
+		if err != nil {
+			fmt.Printf("Error copying baseline: %v\n", err)
+			return
+		}
 	}
-
 	// Override custom/public -> storefront/public
 	overrideDirs := []string{"public", "components", "pages", "layouts"}
 	for _, dir := range overrideDirs {
@@ -94,6 +95,17 @@ func main() {
 		err := copyFile(pocketstoreSrc, pocketstoreDst)
 		if err != nil {
 			fmt.Printf("Error copying pocketstore.json: %v\n", err)
+		}
+	}
+
+	// Copy custom/pocketstore.json -> storefront/pocketstore.json if exists
+	pocketstoreSrc = filepath.Join(custom, "daisyui.css")
+	pocketstoreDst = filepath.Join(storefront, "daisyui.css")
+	if _, err := os.Stat(pocketstoreSrc); err == nil {
+		fmt.Println("Copying baseline/daisyui.css to storefront...")
+		err := copyFile(pocketstoreSrc, pocketstoreDst)
+		if err != nil {
+			fmt.Printf("Error copying daisyui.css: %v\n", err)
 		}
 	}
 
