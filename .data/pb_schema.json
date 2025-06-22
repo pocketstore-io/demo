@@ -1,7 +1,7 @@
 [
     {
         "id": "_pb_users_auth_",
-        "listRule": "id = @request.auth.id",
+        "listRule": "",
         "viewRule": "id = @request.auth.id",
         "createRule": "id = @request.auth.id",
         "updateRule": "id = @request.auth.id",
@@ -323,6 +323,97 @@
         "system": false
     },
     {
+        "id": "pbc_4244377056",
+        "listRule": "",
+        "viewRule": "",
+        "createRule": null,
+        "updateRule": null,
+        "deleteRule": null,
+        "name": "brands_seo",
+        "type": "base",
+        "fields": [
+            {
+                "autogeneratePattern": "[a-z0-9]{15}",
+                "hidden": false,
+                "id": "text3208210256",
+                "max": 15,
+                "min": 15,
+                "name": "id",
+                "pattern": "^[a-z0-9]+$",
+                "presentable": false,
+                "primaryKey": true,
+                "required": true,
+                "system": true,
+                "type": "text"
+            },
+            {
+                "cascadeDelete": false,
+                "collectionId": "pbc_1236351354",
+                "hidden": false,
+                "id": "relation475199832",
+                "maxSelect": 1,
+                "minSelect": 0,
+                "name": "brand",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "relation"
+            },
+            {
+                "autogeneratePattern": "",
+                "hidden": false,
+                "id": "text1579384326",
+                "max": 0,
+                "min": 0,
+                "name": "name",
+                "pattern": "",
+                "presentable": false,
+                "primaryKey": false,
+                "required": true,
+                "system": false,
+                "type": "text"
+            },
+            {
+                "autogeneratePattern": "",
+                "hidden": false,
+                "id": "text196455508",
+                "max": 0,
+                "min": 0,
+                "name": "desc",
+                "pattern": "",
+                "presentable": false,
+                "primaryKey": false,
+                "required": true,
+                "system": false,
+                "type": "text"
+            },
+            {
+                "hidden": false,
+                "id": "autodate2990389176",
+                "name": "created",
+                "onCreate": true,
+                "onUpdate": false,
+                "presentable": false,
+                "system": false,
+                "type": "autodate"
+            },
+            {
+                "hidden": false,
+                "id": "autodate3332085495",
+                "name": "updated",
+                "onCreate": true,
+                "onUpdate": true,
+                "presentable": false,
+                "system": false,
+                "type": "autodate"
+            }
+        ],
+        "indexes": [
+            "CREATE UNIQUE INDEX `idx_am4IDI5Ewd` ON `brands_seo` (`brand`)"
+        ],
+        "system": false
+    },
+    {
         "id": "k6mrcz91e2tprp0",
         "listRule": "",
         "viewRule": "",
@@ -373,6 +464,20 @@
                 "required": true,
                 "system": false,
                 "type": "text"
+            },
+            {
+                "hidden": false,
+                "id": "file2366146245",
+                "maxSelect": 1,
+                "maxSize": 0,
+                "mimeTypes": [],
+                "name": "cover",
+                "presentable": false,
+                "protected": false,
+                "required": true,
+                "system": false,
+                "thumbs": [],
+                "type": "file"
             },
             {
                 "hidden": false,
@@ -462,8 +567,8 @@
     },
     {
         "id": "jam7sfgzn86i62j",
-        "listRule": null,
-        "viewRule": null,
+        "listRule": "",
+        "viewRule": "",
         "createRule": null,
         "updateRule": null,
         "deleteRule": null,
@@ -542,7 +647,9 @@
                 "type": "autodate"
             }
         ],
-        "indexes": [],
+        "indexes": [
+            "CREATE UNIQUE INDEX `idx_pZOhN9H6nI` ON `currencys` (`default`)"
+        ],
         "system": false
     },
     {
@@ -1065,7 +1172,9 @@
                 "type": "autodate"
             }
         ],
-        "indexes": [],
+        "indexes": [
+            "CREATE UNIQUE INDEX `idx_HdlwQxkAMp` ON `product_seo` (`product`)"
+        ],
         "system": false
     },
     {
@@ -1903,177 +2012,6 @@
         "system": false
     },
     {
-        "id": "i7mytqrok8jiafg",
-        "listRule": "",
-        "viewRule": "",
-        "createRule": "",
-        "updateRule": null,
-        "deleteRule": null,
-        "name": "tracking_events",
-        "type": "base",
-        "fields": [
-            {
-                "autogeneratePattern": "[a-z0-9]{15}",
-                "hidden": false,
-                "id": "text3208210256",
-                "max": 15,
-                "min": 15,
-                "name": "id",
-                "pattern": "^[a-z0-9]+$",
-                "presentable": false,
-                "primaryKey": true,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "kpdxgkpj",
-                "max": 0,
-                "min": 0,
-                "name": "name",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": false,
-                "type": "text"
-            },
-            {
-                "hidden": false,
-                "id": "vlacw7hi",
-                "maxSize": 2000000,
-                "name": "data",
-                "presentable": false,
-                "required": false,
-                "system": false,
-                "type": "json"
-            },
-            {
-                "hidden": false,
-                "id": "autodate2990389176",
-                "name": "created",
-                "onCreate": true,
-                "onUpdate": false,
-                "presentable": false,
-                "system": false,
-                "type": "autodate"
-            },
-            {
-                "hidden": false,
-                "id": "autodate3332085495",
-                "name": "updated",
-                "onCreate": true,
-                "onUpdate": true,
-                "presentable": false,
-                "system": false,
-                "type": "autodate"
-            }
-        ],
-        "indexes": [],
-        "system": false
-    },
-    {
-        "id": "sgia0i046cfjbfi",
-        "listRule": "",
-        "viewRule": "",
-        "createRule": "",
-        "updateRule": null,
-        "deleteRule": null,
-        "name": "tracking_pages",
-        "type": "base",
-        "fields": [
-            {
-                "autogeneratePattern": "[a-z0-9]{15}",
-                "hidden": false,
-                "id": "text3208210256",
-                "max": 15,
-                "min": 15,
-                "name": "id",
-                "pattern": "^[a-z0-9]+$",
-                "presentable": false,
-                "primaryKey": true,
-                "required": true,
-                "system": true,
-                "type": "text"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "ye5wzga7",
-                "max": 0,
-                "min": 0,
-                "name": "uri",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": false,
-                "system": false,
-                "type": "text"
-            },
-            {
-                "cascadeDelete": false,
-                "collectionId": "_pb_users_auth_",
-                "hidden": false,
-                "id": "evifbhiy",
-                "maxSelect": 1,
-                "minSelect": 0,
-                "name": "customer",
-                "presentable": false,
-                "required": false,
-                "system": false,
-                "type": "relation"
-            },
-            {
-                "autogeneratePattern": "",
-                "hidden": false,
-                "id": "orfrk6n3",
-                "max": 0,
-                "min": 0,
-                "name": "identifier",
-                "pattern": "",
-                "presentable": false,
-                "primaryKey": false,
-                "required": true,
-                "system": false,
-                "type": "text"
-            },
-            {
-                "hidden": false,
-                "id": "9jowacu1",
-                "maxSize": 2000000,
-                "name": "data",
-                "presentable": false,
-                "required": false,
-                "system": false,
-                "type": "json"
-            },
-            {
-                "hidden": false,
-                "id": "autodate2990389176",
-                "name": "created",
-                "onCreate": true,
-                "onUpdate": false,
-                "presentable": false,
-                "system": false,
-                "type": "autodate"
-            },
-            {
-                "hidden": false,
-                "id": "autodate3332085495",
-                "name": "updated",
-                "onCreate": true,
-                "onUpdate": true,
-                "presentable": false,
-                "system": false,
-                "type": "autodate"
-            }
-        ],
-        "indexes": [],
-        "system": false
-    },
-    {
         "id": "64fro9hhscmxxhn",
         "listRule": "",
         "viewRule": "",
@@ -2136,7 +2074,22 @@
                 "type": "select",
                 "values": [
                     "de",
-                    "en"
+                    "en",
+                    "fr"
+                ]
+            },
+            {
+                "hidden": false,
+                "id": "select2363381545",
+                "maxSelect": 1,
+                "name": "type",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "select",
+                "values": [
+                    "words",
+                    "sentence"
                 ]
             },
             {
