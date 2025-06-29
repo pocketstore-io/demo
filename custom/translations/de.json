@@ -1,0 +1,450 @@
+[
+  {
+    "id": "9uvw7o1knqo8k83",
+    "key": "checkout.cart.empty",
+    "translated": "Warenkorb leer",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "f9384e19wsbm785",
+    "key": "company.google",
+    "translated": "Google",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "mosu7w434p68xb8",
+    "key": "company.github",
+    "translated": "Github",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "4761ewok2u11w2o",
+    "key": "form.login-via",
+    "translated": "Login via",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "ow4b6o6d7z332b5",
+    "key": "form.or",
+    "translated": "oder",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "a9d1qycifgtyq87",
+    "key": "form.form",
+    "translated": "Formular",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "5425415ma63fi5x",
+    "key": "general.title",
+    "translated": "Demo - PocketStore.io",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "o24m5oq3t3382to",
+    "key": "checkout.add-to-cart",
+    "translated": "Jetzt kaufen",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "sc7md1mx7445qwt",
+    "key": "general.note",
+    "translated": "Dies ist ein Demo Store von PocketStore.io",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "1775o54hir5512h",
+    "key": "lang.de",
+    "translated": "Deutsch",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "r553k03hy03s982",
+    "key": "lang.en",
+    "translated": "Englisch",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "2qu2j2dur28vu99",
+    "key": "checkout.addresses",
+    "translated": "Adressen",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "rofw36b6546225w",
+    "key": "country.de",
+    "translated": "Deutschland",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "s67641tpyt2768h",
+    "key": "shipping.methods.dhl",
+    "translated": "DHL",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "b9kvjfxs3096apf",
+    "key": "checkout.label.store",
+    "translated": "Geschäft",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "31s66t90cpz883z",
+    "key": "payment.methods.vorkasse",
+    "translated": "Vorkasse",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "y1h5629b8tn0083",
+    "key": "breadcrumb.home",
+    "translated": "Startseite",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "027cfv2xsmp68t9",
+    "key": "checkout.currency.euro",
+    "translated": "€",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "9pyfv9y0w87vp92",
+    "key": "checkout.currency.dollar",
+    "translated": "$",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "61583b2w0qpo09f",
+    "key": "footer.impressum",
+    "translated": "Impressum",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "tzl10zucqmi4jq9",
+    "key": "footer.data-privacy",
+    "translated": "Datenschutz",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "3t5b5e97u2d62zb",
+    "key": "footer.made-with",
+    "translated": "Gemacht mit",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "b6ie600z5q76skp",
+    "key": "catalog.category",
+    "translated": "Kategorie",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "qn0u5f0h053hnlc",
+    "key": "checkout.checkout",
+    "translated": "Kasse",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "x5n7x57o783b1wu",
+    "key": "product.label.farbe",
+    "translated": "Farbe",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "gr165dy341nyodz",
+    "key": "checkout.cart.headline",
+    "translated": "Warenkorb",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "buxt41j99918oq3",
+    "key": "checkout.customer",
+    "translated": "Kunde",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "mnqon706ep67l0g",
+    "key": "checkout.payment-and-shipping",
+    "translated": "Bezahlung und Versand",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "1txa190l26m9a68",
+    "key": "checkout.confirm",
+    "translated": "Bestellbestätigung",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "jjb85w1238nc2z8",
+    "key": "checkout.same",
+    "translated": "Adresse gleich",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "k3ipf5c0q4qjb4a",
+    "key": "checkout.shipping-address",
+    "translated": "Versandadresse",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "u57prfdh250035n",
+    "key": "checkout.payment-address",
+    "translated": "Bezahladresse",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "o23o3khif7tv831",
+    "key": "checkout.new-address",
+    "translated": "Neue Adresse",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "a2fe26b13nzus35",
+    "key": "checkout.address",
+    "translated": "Adresse",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "69rii2and83xcux",
+    "key": "checkout.label.name",
+    "translated": "Name",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "ir7tkmd3u0u1de8",
+    "key": "checkout.label.surname",
+    "translated": "Nachname",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "t3pf51fn72ls3m1",
+    "key": "checkout.label.street",
+    "translated": "Straße",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "ehphy9z6fr256fu",
+    "key": "checkout.label.number",
+    "translated": "Nummer",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "b1tqnl776889du0",
+    "key": "checkout.label.zip",
+    "translated": "Postleitzahl",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "5ru32g2ni0sq461",
+    "key": "checkout.label.city",
+    "translated": "Stadt",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "emo5jc88r6yu75q",
+    "key": "checkout.label.country",
+    "translated": "Land",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "vbwy84jt4e353r2",
+    "key": "chekout.back.customer",
+    "translated": "Zurück zum Kundenkonto",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "71dy39obob946k0",
+    "key": "checkout.back.cart",
+    "translated": "Zurück zum Warenkorb",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "359q7gw3z74blpk",
+    "key": "checkout.continue.addresses",
+    "translated": "Weiter zu den Adressen",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "zq7lx2d74shtouh",
+    "key": "checkout.continue.customer",
+    "translated": "Weiter zum Kundenkonto",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "4mfrqmn8fvs9hko",
+    "key": "cookie.headline",
+    "translated": "Cookie Banner",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "dsyk0jlopoqayhx",
+    "key": "cookie.note",
+    "translated": "Hier findest du alle Informationen zu Cookie auf dieser Webseite.",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "jy0je8olc714hwd",
+    "key": "cookie.disable",
+    "translated": "ablehnen",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "opors5jrz6el48a",
+    "key": "cookie.accept",
+    "translated": "zustimmen",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "s2oi5bot9lfowee",
+    "key": "product.gallery.no-pictures",
+    "translated": "Wir haben aktuell keine anderen Bilder",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "9qh96ibnqbl6mnm",
+    "key": "product.gallery.headline",
+    "translated": "Produkt Bilder",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "eh6rlp8y70roa3l",
+    "key": "product.stock.empty",
+    "translated": "Keine weiteren auf Lager",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "hdwrbvewercdnxo",
+    "key": "product.stock.warning",
+    "translated": "Nur noch auf Lager",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "4kzki3qibxw9fzn",
+    "key": "product.stock.full",
+    "translated": "Noch auf Lager",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "ro65sb73diie9w7",
+    "key": "product.label.text",
+    "translated": "Name als Text",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  },
+  {
+    "id": "7ypz1c0q8hstcg7",
+    "key": "product.label.format",
+    "translated": "Format",
+    "lang": "de",
+    "type": "words",
+    "collection": ""
+  }
+]
