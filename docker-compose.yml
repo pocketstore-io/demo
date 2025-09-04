@@ -11,6 +11,8 @@ services:
     image: ghcr.io/muchobien/pocketbase:latest
     container_name: pocketbase_prod
     restart: unless-stopped
+    volumes:
+      - ./.hooks:/pb_hooks
     ports:
       - "8090:8090"
     healthcheck: # optional, recommended since v0.10.0
