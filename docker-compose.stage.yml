@@ -1,6 +1,6 @@
 services:
   frontend_stage:
-    container_name: frontend_stage
+    container_name: "${CONTAINER_NUXT}"
     build: .
     volumes:
       - .:/var/www/demo
@@ -9,7 +9,7 @@ services:
       
   pocketbase_stage:
     image: ghcr.io/muchobien/pocketbase:latest
-    container_name: pocketbase_stage
+    container_name: "${CONTAINER_POCKETBASE}"
     restart: unless-stopped
     volumes:
       - ./.hooks:/pb_hooks

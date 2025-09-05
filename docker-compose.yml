@@ -1,15 +1,14 @@
 services:
   frontend_prod:
-    container_name: frontend_prod
+    container_name: ${CONTAINER_NUXT}
     build: .
     volumes:
       - .:/var/www/demo
     ports:
       - "${PORT_NUXT}:3000"
-      
   pocketbase_prod:
     image: ghcr.io/muchobien/pocketbase:latest
-    container_name: pocketbase_prod
+    container_name: ${CONTAINER_POCKETBASE}
     restart: unless-stopped
     volumes:
       - ./.hooks:/pb_hooks

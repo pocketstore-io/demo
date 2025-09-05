@@ -1,6 +1,6 @@
 services:
   frontend_develop:
-    container_name: frontend_develop
+    container_name: "${CONTAINER_NUXT}"
     build: .
     volumes:
       - .:/var/www/demo
@@ -9,7 +9,7 @@ services:
       
   pocketbase_develop:
     image: ghcr.io/muchobien/pocketbase:latest
-    container_name: pocketbase_develop
+    container_name: "${CONTAINER_POCKETBASE}"
     restart: unless-stopped
     volumes:
       - ./.hooks:/pb_hooks
