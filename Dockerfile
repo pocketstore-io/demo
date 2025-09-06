@@ -1,5 +1,5 @@
 # Use an official Node.js base image
-FROM node:22-alpine
+FROM node:24-alpine
 
 RUN apk add go git
 # Set the working directory

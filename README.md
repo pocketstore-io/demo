@@ -46,3 +46,20 @@ docker compose up
 
 This is our Demo Template for Demo.PocketStore.io
 
+
+github.com - secrets
+```
+host: SSH_HOST
+username: SSH_USER
+key: SSH_KEY
+port: SSH_PORT
+folder: SSH_FOLDER
+```
+
+For env prod:
+```
+echo "PORT_NUXT=${{ secrets.PORT_NUXT }}" >> .env
+echo "PORT_POCKETBASE=${{ secrets.PORT_POCKETBASE }}" >> .env
+echo "CONTAINER_NUXT=${{ secrets.CONTAINER_NUXT }}" >> .env
+echo "CONTAINER_POCKETBASE=${{ secrets.CONTAINER_POCKETBASE }}" >> .env
+```
