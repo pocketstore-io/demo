@@ -1,6 +1,6 @@
 services:
   frontend_prod:
-    container_name: ${CONTAINER_NUXT}
+    container_name: "${CONTAINER_NUXT}"
     build: .
     volumes:
       - .:/var/www/demo
@@ -8,7 +8,7 @@ services:
       - "${PORT_NUXT}:3000"
   pocketbase_prod:
     image: ghcr.io/muchobien/pocketbase:latest
-    container_name: ${CONTAINER_POCKETBASE}
+    container_name: "${CONTAINER_POCKETBASE}"
     restart: unless-stopped
     volumes:
       - ./.hooks:/pb_hooks
