@@ -20,10 +20,6 @@ jobs:
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             cd /var/www/develop
-            echo "PORT_NUXT=${{ secrets.PORT_DEV_NUXT }}" >> .env
-            echo "PORT_POCKETBASE=${{ secrets.PORT_DEV_POCKETBASE }}" >> .env
-            echo "CONTAINER_NUXT=${{ secrets.CONTAINER_DEV_NUXT }}" >> .env
-            echo "CONTAINER_POCKETBASE=${{ secrets.CONTAINER_DEV_POCKETBASE }}" >> .env
             git pull
             git checkout develop
             go run bin/extend.go

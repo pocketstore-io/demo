@@ -20,8 +20,6 @@ jobs:
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             cd /var/www/${{ secrets.SSH_FOLDER }}
-            echo "CONTAINER_NUXT=${{ secrets.CONTAINER_NUXT }}" >> .env
-            echo "CONTAINER_POCKETBASE=${{ secrets.CONTAINER_POCKETBASE }}" >> .env
             git reset --hard
             git checkout main
             git pull
