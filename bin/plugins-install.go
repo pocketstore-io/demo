@@ -7,10 +7,10 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
+	"regexp"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strings"
 )
 
 type Plugin struct {
