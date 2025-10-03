@@ -81,6 +81,35 @@ func Unzip(src, dest string) error {
 	return nil
 }
 
+// FetchLatestVersion queries the plugin API for the latest version string
+func FetchLatestVersion(vendor, name string) (string, error) {
+	url := fmt.Sprintf("https://download.pocketstore.io/d/%s/%s/latest-version", vendor, name)
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to fetch latest version: %s", resp.Status)
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(body)), nil
+}
+
+// isSpecialLatestVersion checks if the version string means "latest"
+func isSpecialLatestVersion(version string) bool {
+	version = strings.ToLower(version)
+	if version == "latest" {
+		return true
+	}
+	// Match version pattern like 0.0.1.3 (four numbers separated by dots)
+	matched, _ := regexp.MatchString(`^\d+\.\d+\.\d+\.\d+$`, version)
+	return matched
+}
+
 func main() {
 	installedPath := ".plugins/installed.json"
 	pluginsJSON, err := os.ReadFile(installedPath)
@@ -102,8 +131,23 @@ func main() {
 	}
 
 	for _, plugin := range plugins {
-		url := fmt.Sprintf("https://download.pocketstore.io/d/%s/%s/v%s.zip", plugin.Vendor, plugin.Name, plugin.Version)
-		zipPath := filepath.Join(cacheDir, fmt.Sprintf("%s-%s-%s.zip", plugin.Vendor, plugin.Name, plugin.Version))
+		pluginVersion := plugin.Version
+		// Remove v- prefix if it exists and version is "v-latest" or "v-LATEST" etc
+		if strings.ToLower(pluginVersion) == "v-latest" {
+			pluginVersion = "latest"
+		}
+		if isSpecialLatestVersion(pluginVersion) {
+			ver, err := FetchLatestVersion(plugin.Vendor, plugin.Name)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to fetch latest version for %s/%s: %v\n", plugin.Vendor, plugin.Name, err)
+				os.Exit(10)
+			}
+			pluginVersion = ver
+			fmt.Printf("Resolved latest version for %s/%s: %s\n", plugin.Vendor, plugin.Name, pluginVersion)
+		}
+
+		url := fmt.Sprintf("https://download.pocketstore.io/d/%s/%s/v%s.zip", plugin.Vendor, plugin.Name, pluginVersion)
+		zipPath := filepath.Join(cacheDir, fmt.Sprintf("%s-%s-%s.zip", plugin.Vendor, plugin.Name, pluginVersion))
 		destDir := filepath.Join(".plugins", "repos")
 
 		err := os.MkdirAll(cacheDir, 0755)
@@ -114,18 +158,18 @@ func main() {
 		fmt.Printf("Downloading %s...\n", url)
 		if err := DownloadFile(zipPath, url); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to download %s: %v\n", url, err)
-			_ = os.Remove(zipPath) // Remove the zip file on unzip failure
+			_ = os.Remove(zipPath)
 			os.Exit(11)
 		}
 
 		fmt.Printf("Unzipping to %s...\n", destDir)
 		if err := Unzip(zipPath, destDir); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to unzip %s: %v\n", zipPath, err)
-			_ = os.Remove(zipPath) // Remove the zip file on unzip failure
-			_ = os.Remove(destDir) // Remove the zip file on unzip failure
+			_ = os.Remove(zipPath)
+			_ = os.Remove(destDir)
 			os.Exit(12)
 		}
 
-		fmt.Printf("Installed %s/%s %s\n", plugin.Vendor, plugin.Name, plugin.Version)
+		fmt.Printf("Installed %s/%s %s\n", plugin.Vendor, plugin.Name, pluginVersion)
 	}
 }
