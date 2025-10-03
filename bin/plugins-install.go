@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 )
 
 type Plugin struct {
@@ -83,20 +85,19 @@ func Unzip(src, dest string) error {
 
 // FetchLatestVersion queries the plugin API for the latest version string
 func FetchLatestVersion(vendor, name string) (string, error) {
-	url := fmt.Sprintf("https://download.pocketstore.io/d/%s/%s/latest-version", vendor, name)
-	resp, err := http.Get(url)
+	url := fmt.Sprintf("https://download.pocketstore.io/d/%s/%s/latest.zip", vendor, name)
+	resp, err := http.Head(url)
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
+
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed to fetch latest version: %s", resp.Status)
+		return "", fmt.Errorf("failed to fetch latest: %s", resp.Status)
 	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(string(body)), nil
+
+	// Just return "latest"
+	return "latest", nil
 }
 
 // isSpecialLatestVersion checks if the version string means "latest"
@@ -146,7 +147,7 @@ func main() {
 			fmt.Printf("Resolved latest version for %s/%s: %s\n", plugin.Vendor, plugin.Name, pluginVersion)
 		}
 
-		url := fmt.Sprintf("https://download.pocketstore.io/d/%s/%s/v%s.zip", plugin.Vendor, plugin.Name, pluginVersion)
+		url := fmt.Sprintf("https://download.pocketstore.io/d/%s/%s/%s.zip", plugin.Vendor, plugin.Name, pluginVersion)
 		zipPath := filepath.Join(cacheDir, fmt.Sprintf("%s-%s-%s.zip", plugin.Vendor, plugin.Name, pluginVersion))
 		destDir := filepath.Join(".plugins", "repos")
 
