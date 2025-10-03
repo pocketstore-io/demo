@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"os/exec"
 )
 
 // copyDir recursively copies a directory tree, attempting to preserve permissions.
@@ -109,5 +110,27 @@ func main() {
 		}
 	}
 
+// Print working directory for debugging
+	if wd, err := os.Getwd(); err == nil {
+		fmt.Println("Current working directory:", wd)
+	} else {
+		fmt.Println("Could not determine current working directory:", err)
+	}
+
+	runStep("go run bin/plugins.go", exec.Command("go", "run", "bin/plugins.go"))
+	runStep("go run bin/plugins-install.go", exec.Command("go", "run", "bin/plugins-install.go"))
+	runStep("go run bin/plugins-merge.go", exec.Command("go", "run", "bin/plugins-merge.go"))
+
 	fmt.Println("Copy complete.")
+}
+
+func runStep(name string, cmd *exec.Cmd) {
+	fmt.Printf("==> Running: %s\n", name)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "FAILED: %s: %v\n", name, err)
+		os.Exit(1)
+	}
+	fmt.Printf("==> Done: %s\n", name)
 }

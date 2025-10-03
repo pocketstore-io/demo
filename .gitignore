@@ -1,5 +1,9 @@
 storefront
 
+.plugins/cache
+.plugins/repos
+.plugins/installed.json
+
 # Ignore Jetbrains Idea Folder
 .idea
 
