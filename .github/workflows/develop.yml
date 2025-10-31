@@ -28,5 +28,5 @@ jobs:
             npm i
             npm run build
             cd ..
-            docker compose down
+            docker compose stop
             docker compose -f docker-compose.develop.yml up -d
