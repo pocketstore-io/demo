@@ -52,58 +52,67 @@ func DownloadFile(filepathDest string, url string) error {
 
 // Unzip extracts a zip archive to a specified destination
 func Unzip(src, dest string) error {
-	fmt.Printf("[debug] Unzip called: src=%s dest=%s\n", src, dest)
 	r, err := zip.OpenReader(src)
 	if err != nil {
-		fmt.Printf("[error] zip.OpenReader failed for %s: %v\n", src, err)
 		return err
 	}
 	defer r.Close()
 
-	for _, f := range r.File {
-		fpath := filepath.Join(dest, f.Name)
-		fmt.Printf("[debug] extracting zip entry: %s -> %s\n", f.Name, fpath)
+	// Find common prefix (strip top-level directory from GitHub zips)
+	var prefix string
+	if len(r.File) > 0 {
+		// Get the first entry's path
+		firstPath := r.File[0].Name
+		// If it's a directory, use it as prefix
+		if strings.Contains(firstPath, "/") {
+			prefix = strings.Split(firstPath, "/")[0] + "/"
+		}
+	}
 
+	for _, f := range r.File {
+		// Strip the prefix from the path
+		relativePath := f.Name
+		if prefix != "" && strings.HasPrefix(f.Name, prefix) {
+			relativePath = strings.TrimPrefix(f.Name, prefix)
+		}
+
+		// Skip if we've stripped everything (root directory itself)
+		if relativePath == "" {
+			continue
+		}
+
+		fpath := filepath.Join(dest, relativePath)
 		if f.FileInfo().IsDir() {
-			if err := os.MkdirAll(fpath, os.ModePerm); err != nil {
-				fmt.Printf("[error] mkdir %s failed: %v\n", fpath, err)
-				return err
-			}
+			os.MkdirAll(fpath, os.ModePerm)
 			continue
 		}
 
 		if err := os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
-			fmt.Printf("[error] mkdirall %s failed: %v\n", filepath.Dir(fpath), err)
 			return err
 		}
 
 		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 		if err != nil {
-			fmt.Printf("[error] openfile %s failed: %v\n", fpath, err)
 			return err
 		}
 
 		rc, err := f.Open()
 		if err != nil {
 			outFile.Close()
-			fmt.Printf("[error] f.Open for %s failed: %v\n", f.Name, err)
 			return err
 		}
 
-		written, err := io.Copy(outFile, rc)
+		_, err = io.Copy(outFile, rc)
+
 		outFile.Close()
 		rc.Close()
 
 		if err != nil {
-			fmt.Printf("[error] copy to %s failed: %v\n", fpath, err)
 			return err
 		}
-		fmt.Printf("[debug] wrote %d bytes to %s\n", written, fpath)
 	}
-	fmt.Printf("[debug] Unzip completed for %s\n", src)
 	return nil
 }
-
 // FetchLatestVersion queries the plugin API for the latest version string
 func FetchLatestVersion(vendor, name string) (string, error) {
 	url := fmt.Sprintf("https://download.pocketstore.io/d/plugins/%s/%s/latest.zip", vendor, name)
