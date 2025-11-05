@@ -1,194 +1,222 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
-	"time"
+	"sort"
 )
 
-// Translation is the expected structure for translation records
-type Translation struct {
-	ID         string `json:"id,omitempty"`
-	Key        string `json:"key"`
-	Translated string `json:"translated"`
-	Lang       string `json:"lang"`
-	Type       string `json:"type,omitempty"`
-	Collection string `json:"collection,omitempty"`
+type Plugin struct {
+	Vendor   string
+	Name     string
+	Prio     int
+	BasePath string
 }
 
-// PocketStoreConfig for loading domain from pocketstore.json
-type PocketStoreConfig struct {
-	Domain string `json:"domain"`
+type PluginJson struct {
+	Prio int `json:"prio"`
 }
 
-// robustLangFileLoader loads a translation file (either as array or object) by path and lang
-func robustLangFileLoader(path string, lang string) ([]Translation, error) {
-	data, err := ioutil.ReadFile(path)
+var (
+	pluginRoot     = ".plugins/repos"
+	baselineRoot   = "baseline"
+	storefrontRoot = "storefront"
+)
+
+func main() {
+	// Get list of language files from baseline/translations
+	baselineTranslationsDir := filepath.Join(baselineRoot, "translations")
+	langFiles, err := os.ReadDir(baselineTranslationsDir)
 	if err != nil {
-		// If file does not exist, return empty slice, no error
-		if os.IsNotExist(err) {
-			return []Translation{}, nil
-		}
-		return nil, err
-	}
-	// Try as array
-	var arr []Translation
-	if err := json.Unmarshal(data, &arr); err == nil {
-		// Populate Lang and default Type if missing in object
-		for i := range arr {
-			if arr[i].Lang == "" {
-				arr[i].Lang = lang
-			}
-			if arr[i].Type == "" {
-				arr[i].Type = "words"
-			}
-		}
-		return arr, nil
+		fmt.Printf("Error reading baseline translations: %v\n", err)
+		return
 	}
 
-	// Try as map[string]string or map[string]interface{}
-	var obj map[string]interface{}
-	if err := json.Unmarshal(data, &obj); err == nil {
-		translations := make([]Translation, 0, len(obj))
-		for k, v := range obj {
-			// Stringify v
-			value := fmt.Sprintf("%v", v)
-			translations = append(translations, Translation{
-				Key:        k,
-				Translated: value,
-				Lang:       lang,
-				Type:       "words",
-			})
+	// Extract language codes
+	var langCodes []string
+	for _, file := range langFiles {
+		if !file.IsDir() && filepath.Ext(file.Name()) == ".json" {
+			langCode := file.Name()[:len(file.Name())-5] // remove .json
+			langCodes = append(langCodes, langCode)
 		}
-		return translations, nil
 	}
 
-	return nil, fmt.Errorf("file %s is not a valid translation array or object", path)
+	// Get plugins sorted by priority (descending)
+	plugins := getPlugins()
+	sort.Slice(plugins, func(i, j int) bool {
+		return plugins[i].Prio > plugins[j].Prio
+	})
+
+	// Process each language
+	for _, langCode := range langCodes {
+		fmt.Printf("Processing language: %s\n", langCode)
+		merged := make(map[string]interface{})
+
+		// Start with baseline
+		baselineFile := filepath.Join(baselineTranslationsDir, langCode+".json")
+		if err := mergeTranslationFile(baselineFile, merged); err != nil {
+			fmt.Printf("  Error loading baseline: %v\n", err)
+			continue
+		}
+
+		// Override with plugin translations (highest priority first)
+		for _, plugin := range plugins {
+			pluginTransFile := filepath.Join(plugin.BasePath, "translations", langCode+".json")
+			if exists(pluginTransFile) {
+				id := plugin.Name
+				if plugin.Vendor != "" {
+					id = plugin.Vendor + "/" + plugin.Name
+				}
+				fmt.Printf("  Merging from plugin %s (prio: %d)\n", id, plugin.Prio)
+				if err := mergeTranslationFile(pluginTransFile, merged); err != nil {
+					fmt.Printf("    Error merging: %v\n", err)
+				}
+			}
+		}
+
+		// Write merged result to storefront/i18n/locales/{langcode}.json
+		outputDir := filepath.Join(storefrontRoot, "i18n", "locales")
+		if err := os.MkdirAll(outputDir, 0755); err != nil {
+			fmt.Printf("  Error creating output directory: %v\n", err)
+			continue
+		}
+
+		outputFile := filepath.Join(outputDir, langCode+".json")
+		if err := writeJSON(outputFile, merged); err != nil {
+			fmt.Printf("  Error writing output: %v\n", err)
+			continue
+		}
+
+		fmt.Printf("  Successfully generated %s\n", outputFile)
+	}
 }
 
-// mergeTranslations merges base and overrides (custom) translations by Key+Lang
-func mergeTranslations(base, overrides []Translation) []Translation {
-	merged := make(map[string]Translation)
-	for _, t := range base {
-		merged[t.Lang+"|"+t.Key] = t
+func getPlugins() []Plugin {
+	var plugins []Plugin
+
+	vendorDirs, err := os.ReadDir(pluginRoot)
+	if err != nil {
+		fmt.Printf("Failed to read plugin root: %v\n", err)
+		return plugins
 	}
-	for _, t := range overrides {
-		merged[t.Lang+"|"+t.Key] = t // override or insert
+
+	for _, vendorEntry := range vendorDirs {
+		if !vendorEntry.IsDir() {
+			continue
+		}
+		vendorPath := filepath.Join(pluginRoot, vendorEntry.Name())
+
+		// Check for legacy single-level layout
+		pluginJsonPath := filepath.Join(vendorPath, "plugin.json")
+		if exists(pluginJsonPath) {
+			prio := readPrio(pluginJsonPath)
+			plugins = append(plugins, Plugin{
+				Vendor:   "",
+				Name:     vendorEntry.Name(),
+				Prio:     prio,
+				BasePath: vendorPath,
+			})
+			continue
+		}
+
+		// Two-level layout: vendor/plugin
+		pluginDirs, err := os.ReadDir(vendorPath)
+		if err != nil {
+			continue
+		}
+		for _, p := range pluginDirs {
+			if !p.IsDir() {
+				continue
+			}
+			pluginPath := filepath.Join(vendorPath, p.Name())
+			pluginJsonPath := filepath.Join(pluginPath, "plugin.json")
+			if exists(pluginJsonPath) {
+				prio := readPrio(pluginJsonPath)
+				plugins = append(plugins, Plugin{
+					Vendor:   vendorEntry.Name(),
+					Name:     p.Name(),
+					Prio:     prio,
+					BasePath: pluginPath,
+				})
+			}
+		}
 	}
-	result := make([]Translation, 0, len(merged))
-	for _, t := range merged {
-		result = append(result, t)
+
+	return plugins
+}
+
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
+func readPrio(jsonPath string) int {
+	file, err := os.Open(jsonPath)
+	if err != nil {
+		return 0
+	}
+	defer file.Close()
+	var pj PluginJson
+	if err := json.NewDecoder(file).Decode(&pj); err != nil {
+		return 0
+	}
+	return pj.Prio
+}
+
+func mergeTranslationFile(path string, target map[string]interface{}) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	var source map[string]interface{}
+	if err := json.Unmarshal(data, &source); err != nil {
+		return err
+	}
+
+	mergeMaps(source, target)
+	return nil
+}
+
+func mergeMaps(source, target map[string]interface{}) {
+	for key, value := range source {
+		if sourceMap, ok := value.(map[string]interface{}); ok {
+			if targetMap, ok := target[key].(map[string]interface{}); ok {
+				// Both are maps, merge recursively
+				mergeMaps(sourceMap, targetMap)
+			} else {
+				// Target doesn't have a map, overwrite with source
+				target[key] = deepCopy(sourceMap)
+			}
+		} else {
+			// Simple value, overwrite
+			target[key] = value
+		}
+	}
+}
+
+func deepCopy(source map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	for key, value := range source {
+		if mapValue, ok := value.(map[string]interface{}); ok {
+			result[key] = deepCopy(mapValue)
+		} else {
+			result[key] = value
+		}
 	}
 	return result
 }
 
-// loadPocketStoreDomain reads the domain from pocketstore.json and prepends https:// if not present
-func loadPocketStoreDomain(path string) (string, error) {
-	data, err := ioutil.ReadFile(path)
+func writeJSON(path string, data map[string]interface{}) error {
+	file, err := os.Create(path)
 	if err != nil {
-		return "", fmt.Errorf("failed to read %s: %w", path, err)
+		return err
 	}
-	var cfg PocketStoreConfig
-	if err := json.Unmarshal(data, &cfg); err != nil {
-		return "", fmt.Errorf("failed to parse %s: %w", path, err)
-	}
-	if cfg.Domain == "" {
-		return "", fmt.Errorf("domain not found in %s", path)
-	}
-	// Ensure domain starts with https:// (or http://), prefer https://
-	if !strings.HasPrefix(cfg.Domain, "https://") && !strings.HasPrefix(cfg.Domain, "http://") {
-		cfg.Domain = "https://" + cfg.Domain
-	} else if strings.HasPrefix(cfg.Domain, "http://") {
-		cfg.Domain = "https://" + strings.TrimPrefix(cfg.Domain, "http://")
-	}
-	return cfg.Domain, nil
-}
+	defer file.Close()
 
-// postTranslation posts a single translation to PocketBase API
-func postTranslation(domain string, translation Translation) error {
-	url := fmt.Sprintf("%s/api/collections/translations/records", domain)
-	payload := map[string]interface{}{
-		"key":        translation.Key,
-		"translated": translation.Translated,
-		"lang":       translation.Lang,
-		"type":       translation.Type,
-	}
-	if translation.Collection != "" {
-		payload["collection"] = translation.Collection
-	}
-	body, err := json.Marshal(payload)
-	if err != nil {
-		return fmt.Errorf("failed to marshal payload: %w", err)
-	}
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
-	if err != nil {
-		return fmt.Errorf("failed to post translation: %w", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := ioutil.ReadAll(resp.Body)
-		return fmt.Errorf("error from server: %s\n%s", resp.Status, string(respBody))
-	}
-	return nil
-}
-
-// getLangFiles returns the language files for baseline and custom folders for the given lang
-func getLangFiles(lang string) (string, string) {
-	return filepath.Join(".translations", lang+".json"), filepath.Join("custom", "translations", lang+".json")
-}
-
-func main() {
-	langs := []string{"de", "en", "fr"}
-
-	// 1. Load domain from custom/pocketstore.json
-	domain, err := loadPocketStoreDomain("custom/pocketstore.json")
-	if err != nil {
-		fmt.Println("Error loading pocketstore.json:", err)
-		os.Exit(1)
-	}
-
-	for _, lang := range langs {
-		baselinePath, customPath := getLangFiles(lang)
-
-		// Load baseline (from .translations/lang.json)
-		baseline, err := robustLangFileLoader(baselinePath, lang)
-		if err != nil {
-			fmt.Printf("Error loading baseline for %s: %v\n", lang, err)
-			continue
-		}
-
-		// Load custom (from custom/translations/lang.json)
-		custom, err := robustLangFileLoader(customPath, lang)
-		if err != nil {
-			fmt.Printf("Error loading custom override for %s: %v\n", lang, err)
-			continue
-		}
-
-		// Merge: custom overrides baseline
-		final := mergeTranslations(baseline, custom)
-
-		if len(final) == 0 {
-			fmt.Printf("No translations for %s\n", lang)
-			continue
-		}
-
-		fmt.Printf("Posting %d translations for %s...\n", len(final), lang)
-		success := 0
-		for i, t := range final {
-			err := postTranslation(domain, t)
-			if err != nil {
-				fmt.Printf("Error posting (%s) #%d (key=%s): %v\n", lang, i+1, t.Key, err)
-			} else {
-				success++
-			}
-			time.Sleep(30 * time.Millisecond)
-		}
-		fmt.Printf("Successfully posted %d/%d translations for %s to %s\n", success, len(final), lang, domain)
-	}
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
+	return encoder.Encode(data)
 }
