@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -61,9 +60,7 @@ func Unzip(src, dest string) error {
 	// Find common prefix (strip top-level directory from GitHub zips)
 	var prefix string
 	if len(r.File) > 0 {
-		// Get the first entry's path
 		firstPath := r.File[0].Name
-		// If it's a directory, use it as prefix
 		if strings.Contains(firstPath, "/") {
 			prefix = strings.Split(firstPath, "/")[0] + "/"
 		}
@@ -83,7 +80,9 @@ func Unzip(src, dest string) error {
 
 		fpath := filepath.Join(dest, relativePath)
 		if f.FileInfo().IsDir() {
-			os.MkdirAll(fpath, os.ModePerm)
+			if err := os.MkdirAll(fpath, os.ModePerm); err != nil {
+				return err
+			}
 			continue
 		}
 
@@ -113,6 +112,7 @@ func Unzip(src, dest string) error {
 	}
 	return nil
 }
+
 // FetchLatestVersion queries the plugin API for the latest version string
 func FetchLatestVersion(vendor, name string) (string, error) {
 	url := fmt.Sprintf("https://download.pocketstore.io/d/plugins/%s/%s/latest.zip", vendor, name)
@@ -191,12 +191,15 @@ func main() {
 
 		url := fmt.Sprintf("https://download.pocketstore.io/d/plugins/%s/%s/%s.zip", plugin.Vendor, plugin.Name, pluginVersion)
 		zipPath := filepath.Join(cacheDir, fmt.Sprintf("%s-%s-%s.zip", plugin.Vendor, plugin.Name, pluginVersion))
-		destDir := filepath.Join(".plugins", "repos")
 
-		fmt.Printf("[debug] ensure cache dir (again) %s\n", cacheDir)
-		err := os.MkdirAll(cacheDir, 0755)
-		if err != nil {
-			log.Fatalf("[error] MkdirAll failed: %v", err)
+		// Ensure each plugin is extracted into its own directory under .plugins/repos/<vendor>/<name>
+		destDir := filepath.Join(".plugins", "repos", plugin.Vendor, plugin.Name)
+		fmt.Printf("[debug] plugin destination dir: %s\n", destDir)
+
+		// Remove any existing contents in the plugin destDir so old files do not persist
+		if err := os.RemoveAll(destDir); err != nil {
+			// Non-fatal: warn and continue
+			fmt.Printf("[warn] failed to remove existing dest dir %s: %v\n", destDir, err)
 		}
 
 		fmt.Printf("[info] Downloading %s...\n", url)
@@ -214,6 +217,6 @@ func main() {
 			os.Exit(12)
 		}
 
-		fmt.Printf("[info] Installed %s/%s %s\n", plugin.Vendor, plugin.Name, pluginVersion)
+		fmt.Printf("[info] Installed %s/%s %s into %s\n", plugin.Vendor, plugin.Name, pluginVersion, destDir)
 	}
 }

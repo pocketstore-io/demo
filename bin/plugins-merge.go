@@ -10,6 +10,7 @@ import (
 )
 
 type Plugin struct {
+	Vendor   string
 	Name     string
 	Prio     int
 	BasePath string
@@ -27,7 +28,7 @@ var (
 
 func main() {
 	fmt.Println("Reading plugin root directory:", pluginRoot)
-	pluginDirs, err := os.ReadDir(pluginRoot)
+	vendorDirs, err := os.ReadDir(pluginRoot)
 	if err != nil {
 		fmt.Println("Failed to read plugin root:", err)
 		return
@@ -35,17 +36,49 @@ func main() {
 
 	var plugins []Plugin
 
-	// Collect plugin info and prio
-	for _, entry := range pluginDirs {
-		if entry.IsDir() {
-			pluginPath := filepath.Join(pluginRoot, entry.Name())
+	// Support the new two-level layout: .plugins/repos/<vendor>/<plugin>
+	// Also tolerate legacy single-level layout where plugin.json may live directly under .plugins/repos/<plugin>
+	for _, vendorEntry := range vendorDirs {
+		if !vendorEntry.IsDir() {
+			// skip non-dir entries at top-level
+			continue
+		}
+		vendorPath := filepath.Join(pluginRoot, vendorEntry.Name())
+
+		// Check if this vendorPath itself looks like a plugin (contains plugin.json)
+		pluginJsonPath := filepath.Join(vendorPath, "plugin.json")
+		if exists(pluginJsonPath) {
+			prio := readPrio(pluginJsonPath)
+			fmt.Printf("Found plugin (legacy single-level) %s with prio %d at %s\n", vendorEntry.Name(), prio, vendorPath)
+			plugins = append(plugins, Plugin{
+				Vendor:   "",
+				Name:     vendorEntry.Name(),
+				Prio:     prio,
+				BasePath: vendorPath,
+			})
+			// continue scanning other top-level entries
+			continue
+		}
+
+		// Otherwise treat vendorEntry as a vendor and look for plugins inside it
+		pluginDirs, err := os.ReadDir(vendorPath)
+		if err != nil {
+			fmt.Printf("Failed to read vendor dir %s: %v\n", vendorPath, err)
+			continue
+		}
+		for _, p := range pluginDirs {
+			if !p.IsDir() {
+				continue
+			}
+			pluginPath := filepath.Join(vendorPath, p.Name())
 			pluginJsonPath := filepath.Join(pluginPath, "plugin.json")
 			fmt.Printf("Checking for plugin.json in %s\n", pluginPath)
 			if exists(pluginJsonPath) {
 				prio := readPrio(pluginJsonPath)
-				fmt.Printf("Found plugin %s with prio %d\n", entry.Name(), prio)
+				fmt.Printf("Found plugin %s/%s with prio %d\n", vendorEntry.Name(), p.Name(), prio)
 				plugins = append(plugins, Plugin{
-					Name:     entry.Name(),
+					Vendor:   vendorEntry.Name(),
+					Name:     p.Name(),
 					Prio:     prio,
 					BasePath: pluginPath,
 				})
@@ -62,7 +95,11 @@ func main() {
 
 	// Copy folders for each plugin in order
 	for _, plugin := range plugins {
-		fmt.Printf("Processing plugin: %s (prio: %d)\n", plugin.Name, plugin.Prio)
+		id := plugin.Name
+		if plugin.Vendor != "" {
+			id = plugin.Vendor + "/" + plugin.Name
+		}
+		fmt.Printf("Processing plugin: %s (prio: %d) at %s\n", id, plugin.Prio, plugin.BasePath)
 		for _, d := range dirsToCopy {
 			src := filepath.Join(plugin.BasePath, d)
 			dst := filepath.Join(storefrontRoot, d)
@@ -127,6 +164,11 @@ func copyFile(src, dst string) error {
 		return err
 	}
 	defer in.Close()
+	// Ensure destination directory exists
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		fmt.Printf("      Error creating destination dir for %s: %v\n", dst, err)
+		return err
+	}
 	out, err := os.Create(dst)
 	if err != nil {
 		fmt.Printf("      Error creating destination file %s: %v\n", dst, err)
