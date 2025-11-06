@@ -1,28 +1,21 @@
 {
-  "domain": "admin.pocketstore.io",
-  "authToken": "your_admin_auth_token",
-  "settings": {
-    "theme": "default",
-    "support": "support@jonathan-martz.de",
-    "language": "de",
+  "domains": {
+    "nuxt": "demo.pocketstore.io",
+    "pocketbase": "admin.pocketstore.io"
+  },
+  "maintance": {
+    "enabled": false,
+    "until": "12.10.2026 12:12:12"
+  },
+  "emails": {
+    "support": {
+      "address": "support@jonathan-martz.de",
+      "name": "support"
+    }
+  },
+  "language": {
+    "fallback": "de",
     "languages": ["en", "de", "fr"],
-    "currency": "€",
-    "currencies": ["€", "$"],
-    "tax_general": 19,
-    "tax_food": 7,
-    "paypal": {
-      "client-id": "AUtZarD95T0LXYT1Dn51mBIBswWY3QDb-S380C-_xgfhqqJ6IEJHZh-wuRnRzNy184Lj5fpbXokZBiOk",
-      "currency": "EUR"
-    },
-    "stripe": {
-      "client-id": "pk_test_51QJlDLR5d3xw1mbRyaq24na2qlIiPpPjYfnq9m6TL2PSmhjvt2DFh0DHK6aUGaw5M4Mp81wlCOhpqW2jcvZfi3YQ000eWIgGiJ"
-    },
-    "klarna": {
-      "client-id": "klarna_test_client_cVMhVCU_b0RwVG4pcml3ay16SCUxcnJqeVVJKnkjbmQsY2YzZWM4NDEtOTNlOS00MDc5LWI2NDctNzE0ZmZjZTM5M2Q2LDEsQ2F5OUJIMndTOXd5b3k4dzFGdTlkbVk1YlNkcUdRVGFhb1hoTnpsT0tNYz0"
-    },
-    "cookiefirst": {
-      "id": "36ed47d8-6292-415a-bfce-f218a0e0d183"
-    },
     "locales": [
       {
         "code": "de",
@@ -33,5 +26,26 @@
         "file": "en.json"
       }
     ]
+  },
+  "currency": {
+    "fallback": "€",
+    "currencies": ["€", "$"]
+  },
+  "integrations": {
+    "cookiefirst": {
+      "id": "36ed47d8-6292-415a-bfce-f218a0e0d183"
+    }
+  },
+  "payment": {
+    "paypal": {
+      "client-id": "AUtZarD95T0LXYT1Dn51mBIBswWY3QDb-S380C-_xgfhqqJ6IEJHZh-wuRnRzNy184Lj5fpbXokZBiOk",
+      "currency": "EUR"
+    },
+    "stripe": {
+      "client-id": "pk_test_51QJlDLR5d3xw1mbRyaq24na2qlIiPpPjYfnq9m6TL2PSmhjvt2DFh0DHK6aUGaw5M4Mp81wlCOhpqW2jcvZfi3YQ000eWIgGiJ"
+    },
+    "klarna": {
+      "client-id": "klarna_test_client_cVMhVCU_b0RwVG4pcml3ay16SCUxcnJqeVVJKnkjbmQsY2YzZWM4NDEtOTNlOS00MDc5LWI2NDctNzE0ZmZjZTM5M2Q2LDEsQ2F5OUJIMndTOXd5b3k4dzFGdTlkbVk1YlNkcUdRVGFhb1hoTnpsT0tNYz0"
+    }
   }
 }
