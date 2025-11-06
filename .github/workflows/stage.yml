@@ -23,8 +23,8 @@ jobs:
             git pull
             git checkout stage
             go run bin/extend.go
+            go run bin/translations.go
             cd storefront
-            go run bin/lang.go
             npm i
             npm run build
             cd ..
