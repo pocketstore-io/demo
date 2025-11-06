@@ -9,9 +9,3 @@ storefront
 
 # Ignore node dependencies
 node_modules
-
-# Ignore composer dependencies
-vendor
-
-pb_data
-pb_hooks
