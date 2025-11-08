@@ -27,6 +27,7 @@ jobs:
             cd storefront
             npm i
             bun run vitest
+            bun run lint
             npm run build
             cd ..
             docker compose stop
