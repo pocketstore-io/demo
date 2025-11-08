@@ -17,18 +17,18 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            echo "PORT_NUXT=${{ secrets.PORT_STAGE_NUXT }}" >> .env
-            echo "PORT_POCKETBASE=${{ secrets.PORT_STAGE_POCKETBASE }}" >> .env
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             cd /var/www/stage
             git pull
             git checkout stage
             go run bin/extend.go
+            go run bin/translations.go
             cd storefront
-            go run bin/lang.go
             npm i
+            bun run vitest
+            bun run lint
             npm run build
             cd ..
-            docker compose down
+            docker compose stop
             docker compose -f docker-compose.stage.yml up -d

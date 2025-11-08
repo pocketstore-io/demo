@@ -1,13 +1,11 @@
 storefront
 
+.plugins/cache
+.plugins/repos
+.plugins/installed.json
+
 # Ignore Jetbrains Idea Folder
 .idea
 
 # Ignore node dependencies
 node_modules
-
-# Ignore composer dependencies
-vendor
-
-pb_data
-pb_hooks
