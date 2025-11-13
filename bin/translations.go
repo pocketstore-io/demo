@@ -22,6 +22,7 @@ type PluginJson struct {
 var (
 	pluginRoot     = ".plugins/repos"
 	baselineRoot   = "baseline"
+	customRoot     = "custom" // 👈 new: custom translations root
 	storefrontRoot = "storefront"
 )
 
@@ -54,14 +55,23 @@ func main() {
 		fmt.Printf("Processing language: %s\n", langCode)
 		merged := make(map[string]interface{})
 
-		// Start with baseline
+		// 1️⃣ Start with baseline
 		baselineFile := filepath.Join(baselineTranslationsDir, langCode+".json")
 		if err := mergeTranslationFile(baselineFile, merged); err != nil {
 			fmt.Printf("  Error loading baseline: %v\n", err)
 			continue
 		}
 
-		// Override with plugin translations (highest priority first)
+		// 2️⃣ Merge custom overrides right after baseline
+		customFile := filepath.Join(customRoot, "translations", langCode+".json")
+		if exists(customFile) {
+			fmt.Printf("  Merging custom translations: %s\n", customFile)
+			if err := mergeTranslationFile(customFile, merged); err != nil {
+				fmt.Printf("    Error merging custom file: %v\n", err)
+			}
+		}
+
+		// 3️⃣ Override with plugin translations (highest priority first)
 		for _, plugin := range plugins {
 			pluginTransFile := filepath.Join(plugin.BasePath, "translations", langCode+".json")
 			if exists(pluginTransFile) {
@@ -76,7 +86,7 @@ func main() {
 			}
 		}
 
-		// Write merged result to storefront/i18n/locales/{langcode}.json
+		// 4️⃣ Write merged result to storefront/i18n/locales/{langcode}.json
 		outputDir := filepath.Join(storefrontRoot, "i18n", "locales")
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
 			fmt.Printf("  Error creating output directory: %v\n", err)
@@ -187,11 +197,9 @@ func mergeMaps(source, target map[string]interface{}) {
 				// Both are maps, merge recursively
 				mergeMaps(sourceMap, targetMap)
 			} else {
-				// Target doesn't have a map, overwrite with source
 				target[key] = deepCopy(sourceMap)
 			}
 		} else {
-			// Simple value, overwrite
 			target[key] = value
 		}
 	}
