@@ -9,7 +9,7 @@ RUN go run bin/update.go
 RUN go run bin/extend.go
 
 WORKDIR /var/www/demo/storefront
-RUN go run bin/lang.go
+RUN go run bin/translations.go
 
 # Install global dependencies
 RUN npm install -g pm2 npm
