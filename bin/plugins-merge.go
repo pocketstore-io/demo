@@ -23,7 +23,7 @@ type PluginJson struct {
 var (
 	pluginRoot     = ".plugins/repos"
 	storefrontRoot = "storefront"
-	dirsToCopy     = []string{"pages", "components", "layouts", "public", "translations"}
+	dirsToCopy     = []string{"pages", "components", "layouts", "public"}
 )
 
 func main() {
