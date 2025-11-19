@@ -1,16 +1,6 @@
 [
   {
     "version": "latest",
-    "name": "cookie-banner",
-    "vendor": "pocketstore-io"
-  },
-  {
-    "version": "latest",
-    "name": "hello-world",
-    "vendor": "pocketstore-io"
-  },
-  {
-    "version": "latest",
     "name": "breadcrumb",
     "vendor": "pocketstore-io"
   },
@@ -27,6 +17,16 @@
   {
     "version": "latest",
     "name": "catalog-product",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
+    "name": "cookie-banner",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
+    "name": "hello-world",
     "vendor": "pocketstore-io"
   }
 ]
