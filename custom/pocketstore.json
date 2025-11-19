@@ -38,7 +38,7 @@
   },
   "payment": {
     "paypal": {
-      "client-id": "AUtZarD95T0LXYT1Dn51mBIBswWY3QDb-S380C-_xgfhqqJ6IEJHZh-wuRnRzNy184Lj5fpbXokZBiOk",
+      "id": "AUtZarD95T0LXYT1Dn51mBIBswWY3QDb-S380C-_xgfhqqJ6IEJHZh-wuRnRzNy184Lj5fpbXokZBiOk",
       "currency": "EUR"
     }
   }
