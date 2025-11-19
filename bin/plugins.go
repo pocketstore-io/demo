@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 )
 
 type Plugin struct {
@@ -56,6 +57,14 @@ func main() {
 	for _, p := range unique {
 		result = append(result, p)
 	}
+
+	// Sort alphabetically by vendor, then by name
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].Vendor == result[j].Vendor {
+			return result[i].Name < result[j].Name
+		}
+		return result[i].Vendor < result[j].Vendor
+	})
 
 	out, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
