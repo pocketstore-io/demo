@@ -83,24 +83,30 @@ func main() {
 	})
 
 	// Copy folders for each plugin
-	for _, plugin := range plugins {
-		fmt.Printf("Processing plugin: %s/%s (prio: %d)\n", plugin.Vendor, plugin.Name, plugin.Prio)
-		for _, d := range dirsToCopy {
-			src := filepath.Join(plugin.BasePath, d)
+    for _, plugin := range plugins {
+        fmt.Printf("Processing plugin: %s/%s (prio: %d)\n", plugin.Vendor, plugin.Name, plugin.Prio)
+
+        for _, d := range dirsToCopy {
+            src := filepath.Join(plugin.BasePath, d)
+
+            // FIX: public goes to storefront/public, others to storefront/app/<dir>
             var dst string
             if d == "public" {
-                dst = filepath.Join(d) // storefront/public
+                dst = filepath.Join("public")           // storefront/public
             } else {
-                dst = filepath.Join("app", d) // storefront/app/<dir>
+                dst = filepath.Join("app", d)           // storefront/app/<dir>
             }
-			if exists(src) {
-				fmt.Printf("  Copying %s → %s\n", src, dst)
-				if err := copyDir(src, "storefront/"+dst); err != nil {
-					fmt.Printf("  Error copying %s: %v\n", d, err)
-				}
-			}
-		}
-	}
+
+            if exists(src) {
+                finalDst := filepath.Join("storefront", dst)
+                fmt.Printf("  Copying %s → %s\n", src, finalDst)
+
+                if err := copyDir(src, finalDst); err != nil {
+                    fmt.Printf("  Error copying %s: %v\n", d, err)
+                }
+            }
+        }
+    }
 }
 
 func exists(path string) bool {
