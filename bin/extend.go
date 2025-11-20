@@ -105,7 +105,7 @@ func main() {
 
 	// Copy custom/pocketstore.json -> storefront/pocketstore.json if exists
 	pocketstoreSrc := filepath.Join(custom, "pocketstore.json")
-	pocketstoreDst := filepath.Join(storefront, "pocketstore.json")
+	pocketstoreDst := filepath.Join(storefront,"app", "pocketstore.json")
 	if _, err := os.Stat(pocketstoreSrc); err == nil {
 		fmt.Println("Copying custom/pocketstore.json to storefront...")
 		err := copyFile(pocketstoreSrc, pocketstoreDst)
