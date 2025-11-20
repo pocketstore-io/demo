@@ -87,7 +87,12 @@ func main() {
 		fmt.Printf("Processing plugin: %s/%s (prio: %d)\n", plugin.Vendor, plugin.Name, plugin.Prio)
 		for _, d := range dirsToCopy {
 			src := filepath.Join(plugin.BasePath, d)
-			dst := filepath.Join("app", d) // copy into app/<folder>
+            var dst string
+            if d == "public" {
+                dst = filepath.Join(storefront, d) // storefront/public
+            } else {
+                dst = filepath.Join(storefront, "app", d) // storefront/app/<dir>
+            }
 			if exists(src) {
 				fmt.Printf("  Copying %s → %s\n", src, dst)
 				if err := copyDir(src, "storefront/"+dst); err != nil {
