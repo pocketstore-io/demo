@@ -89,9 +89,9 @@ func main() {
 			src := filepath.Join(plugin.BasePath, d)
             var dst string
             if d == "public" {
-                dst = filepath.Join("storefront", d) // storefront/public
+                dst = filepath.Join(d) // storefront/public
             } else {
-                dst = filepath.Join("storefront", "app", d) // storefront/app/<dir>
+                dst = filepath.Join("app", d) // storefront/app/<dir>
             }
 			if exists(src) {
 				fmt.Printf("  Copying %s → %s\n", src, dst)
