@@ -1,0 +1,47 @@
+[
+  {
+    "version": "latest",
+    "name": "breadcrumb",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
+    "name": "catalog-product",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
+    "name": "checkout",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
+    "name": "cookie-banner",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
+    "name": "customer",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
+    "name": "disclaimer-demo",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
+    "name": "hello-world",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
+    "name": "homepage-demo",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
+    "name": "impressum-demo",
+    "vendor": "pocketstore-io"
+  }
+]

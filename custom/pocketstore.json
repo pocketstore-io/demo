@@ -38,14 +38,8 @@
   },
   "payment": {
     "paypal": {
-      "client-id": "AUtZarD95T0LXYT1Dn51mBIBswWY3QDb-S380C-_xgfhqqJ6IEJHZh-wuRnRzNy184Lj5fpbXokZBiOk",
+      "id": "AUtZarD95T0LXYT1Dn51mBIBswWY3QDb-S380C-_xgfhqqJ6IEJHZh-wuRnRzNy184Lj5fpbXokZBiOk",
       "currency": "EUR"
-    },
-    "stripe": {
-      "client-id": "pk_test_51QJlDLR5d3xw1mbRyaq24na2qlIiPpPjYfnq9m6TL2PSmhjvt2DFh0DHK6aUGaw5M4Mp81wlCOhpqW2jcvZfi3YQ000eWIgGiJ"
-    },
-    "klarna": {
-      "client-id": "klarna_test_client_cVMhVCU_b0RwVG4pcml3ay16SCUxcnJqeVVJKnkjbmQsY2YzZWM4NDEtOTNlOS00MDc5LWI2NDctNzE0ZmZjZTM5M2Q2LDEsQ2F5OUJIMndTOXd5b3k4dzFGdTlkbVk1YlNkcUdRVGFhb1hoTnpsT0tNYz0"
     }
   }
 }

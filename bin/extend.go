@@ -3,29 +3,33 @@ package main
 import (
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"os/exec"
 )
 
-// copyDir recursively copies a directory tree, attempting to preserve permissions.
-// Source directory must exist, destination directory will be created if necessary.
-func copyDir(src string, dst string) error {
-	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
+// copyDirContents copies the contents of src into dst without creating the src folder itself
+func copyDirContents(src, dst string) error {
+	entries, err := os.ReadDir(src)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		srcPath := filepath.Join(src, entry.Name())
+		dstPath := filepath.Join(dst, entry.Name())
+
+		if entry.IsDir() {
+			if err := copyDirContents(srcPath, dstPath); err != nil {
+				return err
+			}
+		} else {
+			if err := copyFile(srcPath, dstPath); err != nil {
+				return err
+			}
 		}
-		relPath, err := filepath.Rel(src, path)
-		if err != nil {
-			return err
-		}
-		targetPath := filepath.Join(dst, relPath)
-		if d.IsDir() {
-			return os.MkdirAll(targetPath, os.ModePerm)
-		}
-		return copyFile(path, targetPath)
-	})
+	}
+	return nil
 }
 
 // copyFile copies a file from src to dst
@@ -52,7 +56,8 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	// Optionally, copy file mode
+
+	// Copy file mode
 	fi, err := srcFile.Stat()
 	if err == nil {
 		_ = os.Chmod(dst, fi.Mode())
@@ -66,31 +71,41 @@ func main() {
 	custom := "custom"
 	targetConfig := filepath.Join(storefront, "nuxt.config.ts")
 
+	// Copy baseline if storefront does not exist
 	if _, err := os.Stat(targetConfig); os.IsNotExist(err) {
 		fmt.Println("Copying baseline to storefront...")
-		err := copyDir(baseline, storefront)
+		err := copyDirContents(baseline, storefront)
 		if err != nil {
 			fmt.Printf("Error copying baseline: %v\n", err)
 			return
 		}
 	}
-	// Override custom/public -> storefront/public
-	overrideDirs := []string{"public", "components", "pages", "layouts"}
-	for _, dir := range overrideDirs {
-		src := filepath.Join(custom, dir)
-		dst := filepath.Join(storefront, dir)
-		if _, err := os.Stat(src); err == nil {
-			fmt.Printf("Overriding %s -> %s...\n", src, dst)
-			err := copyDir(src, dst)
-			if err != nil {
-				fmt.Printf("Error overriding %s: %v\n", dir, err)
-			}
-		}
-	}
+
+	overrideDirs := []string{"public", "components", "pages", "layouts", "utils"}
+
+        for _, dir := range overrideDirs {
+            src := filepath.Join(custom, dir)
+
+            // special case for public
+            var dst string
+            if dir == "public" {
+                dst = filepath.Join(storefront, "public")
+            } else {
+                dst = filepath.Join(storefront, "app", dir)
+            }
+
+            if _, err := os.Stat(src); err == nil {
+                fmt.Printf("Overriding %s -> %s...\n", src, dst)
+                err := copyDirContents(src, dst)
+                if err != nil {
+                    fmt.Printf("Error overriding %s: %v\n", dir, err)
+                }
+            }
+        }
 
 	// Copy custom/pocketstore.json -> storefront/pocketstore.json if exists
 	pocketstoreSrc := filepath.Join(custom, "pocketstore.json")
-	pocketstoreDst := filepath.Join(storefront, "pocketstore.json")
+	pocketstoreDst := filepath.Join(storefront,"app", "pocketstore.json")
 	if _, err := os.Stat(pocketstoreSrc); err == nil {
 		fmt.Println("Copying custom/pocketstore.json to storefront...")
 		err := copyFile(pocketstoreSrc, pocketstoreDst)
@@ -99,24 +114,25 @@ func main() {
 		}
 	}
 
-	// Copy custom/pocketstore.json -> storefront/pocketstore.json if exists
-	pocketstoreSrc = filepath.Join(custom, "daisyui.css")
-	pocketstoreDst = filepath.Join(storefront, "daisyui.css")
-	if _, err := os.Stat(pocketstoreSrc); err == nil {
-		fmt.Println("Copying baseline/daisyui.css to storefront...")
-		err := copyFile(pocketstoreSrc, pocketstoreDst)
+	// Copy custom/daisyui.css -> storefront/daisyui.css if exists
+	daisySrc := filepath.Join(custom, "daisyui.css")
+	daisyDst := filepath.Join(storefront, "daisyui.css")
+	if _, err := os.Stat(daisySrc); err == nil {
+		fmt.Println("Copying custom/daisyui.css to storefront...")
+		err := copyFile(daisySrc, daisyDst)
 		if err != nil {
 			fmt.Printf("Error copying daisyui.css: %v\n", err)
 		}
 	}
 
-// Print working directory for debugging
+	// Print working directory for debugging
 	if wd, err := os.Getwd(); err == nil {
 		fmt.Println("Current working directory:", wd)
 	} else {
 		fmt.Println("Could not determine current working directory:", err)
 	}
 
+	// Run plugin scripts
 	runStep("go run bin/plugins.go", exec.Command("go", "run", "bin/plugins.go"))
 	runStep("go run bin/plugins-install.go", exec.Command("go", "run", "bin/plugins-install.go"))
 	runStep("go run bin/plugins-merge.go", exec.Command("go", "run", "bin/plugins-merge.go"))
