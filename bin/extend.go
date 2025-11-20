@@ -81,19 +81,27 @@ func main() {
 		}
 	}
 
-	// Override custom folders -> storefront/app/<folder>
 	overrideDirs := []string{"public", "components", "pages", "layouts", "utils"}
-	for _, dir := range overrideDirs {
-		src := filepath.Join(custom, dir)
-		dst := filepath.Join(storefront, "app", dir) // <-- CORRECT destination
-		if _, err := os.Stat(src); err == nil {
-			fmt.Printf("Overriding %s -> %s...\n", src, dst)
-			err := copyDirContents(src, dst)
-			if err != nil {
-				fmt.Printf("Error overriding %s: %v\n", dir, err)
-			}
-		}
-	}
+
+        for _, dir := range overrideDirs {
+            src := filepath.Join(custom, dir)
+
+            // special case for public
+            var dst string
+            if dir == "public" {
+                dst = filepath.Join(storefront, "public")
+            } else {
+                dst = filepath.Join(storefront, "app", dir)
+            }
+
+            if _, err := os.Stat(src); err == nil {
+                fmt.Printf("Overriding %s -> %s...\n", src, dst)
+                err := copyDirContents(src, dst)
+                if err != nil {
+                    fmt.Printf("Error overriding %s: %v\n", dir, err)
+                }
+            }
+        }
 
 	// Copy custom/pocketstore.json -> storefront/pocketstore.json if exists
 	pocketstoreSrc := filepath.Join(custom, "pocketstore.json")
