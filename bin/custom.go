@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"os/exec"
 )
 
 // copyDirContents copies the contents of src into dst without creating the src folder itself
