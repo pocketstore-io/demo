@@ -1,6 +1,11 @@
 [
   {
     "version": "latest",
+    "name": "backtotop",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
     "name": "breadcrumb",
     "vendor": "pocketstore-io"
   },
@@ -42,6 +47,16 @@
   {
     "version": "latest",
     "name": "impressum-demo",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
+    "name": "live-chat",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
+    "name": "toasts",
     "vendor": "pocketstore-io"
   }
 ]
