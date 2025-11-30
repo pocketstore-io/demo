@@ -51,6 +51,11 @@
   },
   {
     "version": "latest",
+    "name": "image-slider",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
     "name": "impressum-demo",
     "vendor": "pocketstore-io"
   },
