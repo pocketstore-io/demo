@@ -14,6 +14,7 @@ WORKDIR /var/www/demo/storefront
 
 # Install global dependencies
 RUN npm install -g pm2 npm
+RUN go run bin/sitemap.go
 
 # Install project dependencies
 RUN npm install
