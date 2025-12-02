@@ -13,13 +13,13 @@ RUN go run bin/translations.go
 WORKDIR /var/www/demo/storefront
 
 # Install global dependencies
-RUN npm install -g pm2 npm
+RUN npm install -g pm2 npm bun
 RUN go run bin/sitemap.go
 
 # Install project dependencies
-RUN npm install
+RUN bun install
 
 # Expose the desired port
 EXPOSE 3000
 
-CMD ["npx", "nuxi", "preview"]
+CMD ["bun", "x", "nuxi", "preview"]
