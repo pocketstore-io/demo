@@ -76,6 +76,11 @@
   },
   {
     "version": "latest",
+    "name": "reviews",
+    "vendor": "pocketstore-io"
+  },
+  {
+    "version": "latest",
     "name": "toasts",
     "vendor": "pocketstore-io"
   }
