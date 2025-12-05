@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"os/exec"
 )
 
 // copyDirContents copies the contents of src into dst without creating the src folder itself
@@ -71,6 +70,8 @@ func main() {
 	custom := "custom"
 	targetConfig := filepath.Join(storefront, "nuxt.config.ts")
 
+	copyDirContents(baseline,storefront)
+
 	// Copy baseline if storefront does not exist
 	if _, err := os.Stat(targetConfig); os.IsNotExist(err) {
 		fmt.Println("Copying baseline to storefront...")
@@ -132,21 +133,5 @@ func main() {
 		fmt.Println("Could not determine current working directory:", err)
 	}
 
-	// Run plugin scripts
-	runStep("go run bin/plugins.go", exec.Command("go", "run", "bin/plugins.go"))
-	runStep("go run bin/plugins-install.go", exec.Command("go", "run", "bin/plugins-install.go"))
-	runStep("go run bin/plugins-merge.go", exec.Command("go", "run", "bin/plugins-merge.go"))
-
 	fmt.Println("Copy complete.")
-}
-
-func runStep(name string, cmd *exec.Cmd) {
-	fmt.Printf("==> Running: %s\n", name)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "FAILED: %s: %v\n", name, err)
-		os.Exit(1)
-	}
-	fmt.Printf("==> Done: %s\n", name)
 }

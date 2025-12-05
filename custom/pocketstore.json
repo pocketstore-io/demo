@@ -34,6 +34,9 @@
   "integrations": {
     "cookiefirst": {
       "id": "36ed47d8-6292-415a-bfce-f218a0e0d183"
+    },
+    "pirsch": {
+      "id": "YJOaZhm8IdEgTO9uy5lzkF583HLgfQs7"
     }
   },
   "payment": {

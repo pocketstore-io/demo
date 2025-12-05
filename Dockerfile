@@ -6,18 +6,20 @@ RUN apk add go git
 COPY . /var/www/demo
 WORKDIR /var/www/demo
 RUN go run bin/update.go
-RUN go run bin/extend.go
+RUN go run bin/custom.go
+RUN go run bin/plugins.go
 RUN go run bin/translations.go
 
 WORKDIR /var/www/demo/storefront
 
 # Install global dependencies
-RUN npm install -g pm2 npm
+RUN npm install -g pm2 npm bun
+RUN go run bin/sitemap.go
 
 # Install project dependencies
-RUN npm install
+RUN bun install
 
 # Expose the desired port
 EXPOSE 3000
 
-CMD ["npx", "nuxi", "preview"]
+CMD ["nuxi", "preview"]
