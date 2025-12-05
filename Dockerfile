@@ -22,4 +22,4 @@ RUN bun install
 # Expose the desired port
 EXPOSE 3000
 
-CMD ["bun", "x", "nuxi", "preview"]
+CMD ["nuxi", "preview"]
