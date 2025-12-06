@@ -13,6 +13,7 @@ type Plugin struct {
 	Name     string `json:"name"`
 	Vendor   string `json:"vendor"`
 	Revision string `json:"revision,omitempty"`
+	Source   string `json:"-"` // Track source: "baseline", "custom", "storefront", or parent plugin key
 }
 
 type PluginMeta struct {
@@ -56,22 +57,32 @@ func readPluginMeta(vendor, name string) (*PluginMeta, error) {
 }
 
 // resolveRequirements recursively resolves all plugin requirements
-func resolveRequirements(plugins []Plugin) ([]Plugin, error) {
+func resolveRequirements(baselinePlugins, customPlugins, storefrontPlugins []Plugin) ([]Plugin, error) {
 	seen := make(map[string]bool)
 	result := make([]Plugin, 0)
 	queue := make([]Plugin, 0)
-	dependencyTree := make(map[string][]string) // parent -> children
+	dependencyTree := make(map[string][]string)   // parent -> children
+	sourceMap := make(map[string]string)          // plugin key -> source
 	isRoot := make(map[string]bool)
 
-	// Initialize queue with input plugins
-	for _, p := range plugins {
-		key := p.Vendor + "/" + p.Name
-		if !seen[key] {
-			seen[key] = true
-			queue = append(queue, p)
-			isRoot[key] = true
+	// Helper to add plugins from a source
+	addPlugins := func(plugins []Plugin, source string) {
+		for _, p := range plugins {
+			key := p.Vendor + "/" + p.Name
+			if !seen[key] {
+				p.Source = source
+				seen[key] = true
+				queue = append(queue, p)
+				sourceMap[key] = source
+				isRoot[key] = true
+			}
 		}
 	}
+
+	// Add plugins in priority order
+	addPlugins(baselinePlugins, "baseline")
+	addPlugins(customPlugins, "custom")
+	addPlugins(storefrontPlugins, "storefront")
 
 	// BFS traversal to resolve all dependencies
 	for len(queue) > 0 {
@@ -108,20 +119,43 @@ func resolveRequirements(plugins []Plugin) ([]Plugin, error) {
 				Vendor:  vendor,
 				Name:    name,
 				Version: "latest",
+				Source:  currentKey, // Track which plugin required this
 			}
+			sourceMap[key] = currentKey
 			queue = append(queue, newPlugin)
 			fmt.Printf("  [%s] requires → %s\n", currentKey, key)
 		}
 	}
 
-	// Print dependency tree
+	// Print dependency tree with sources
 	if len(dependencyTree) > 0 {
 		fmt.Println("\n==> Dependency Tree:")
 		visited := make(map[string]bool)
-		for _, root := range plugins {
-			key := root.Vendor + "/" + root.Name
-			if isRoot[key] {
-				printNode(dependencyTree, key, "", visited, true, true)
+
+		// Print baseline plugins
+		if len(baselinePlugins) > 0 {
+			fmt.Println("\n📦 FROM baseline/plugins.json:")
+			for _, root := range baselinePlugins {
+				key := root.Vendor + "/" + root.Name
+				printNodeWithSource(dependencyTree, sourceMap, key, "  ", visited, true, true)
+			}
+		}
+
+		// Print custom plugins
+		if len(customPlugins) > 0 {
+			fmt.Println("\n📦 FROM custom/plugins.json:")
+			for _, root := range customPlugins {
+				key := root.Vendor + "/" + root.Name
+				printNodeWithSource(dependencyTree, sourceMap, key, "  ", visited, true, true)
+			}
+		}
+
+		// Print storefront plugins
+		if len(storefrontPlugins) > 0 {
+			fmt.Println("\n📦 FROM storefront/plugins.json:")
+			for _, root := range storefrontPlugins {
+				key := root.Vendor + "/" + root.Name
+				printNodeWithSource(dependencyTree, sourceMap, key, "  ", visited, true, true)
 			}
 		}
 	}
@@ -129,17 +163,22 @@ func resolveRequirements(plugins []Plugin) ([]Plugin, error) {
 	return result, nil
 }
 
-// printNode prints a visual tree node with its children
-func printNode(tree map[string][]string, key string, prefix string, visited map[string]bool, isLast bool, isRoot bool) {
+// printNodeWithSource prints a visual tree node with source information
+func printNodeWithSource(tree map[string][]string, sourceMap map[string]string, key string, prefix string, visited map[string]bool, isLast bool, isRoot bool) {
 	marker := "├──"
 	if isLast {
 		marker = "└──"
 	}
 
 	if isRoot {
-		fmt.Printf("%s\n", key)
+		fmt.Printf("%s%s\n", prefix, key)
 	} else {
-		fmt.Printf("%s%s %s\n", prefix, marker, key)
+		source := sourceMap[key]
+		sourceLabel := ""
+		if source != "" && source != "baseline" && source != "custom" && source != "storefront" {
+			sourceLabel = fmt.Sprintf(" (required by: %s)", source)
+		}
+		fmt.Printf("%s%s %s%s\n", prefix, marker, key, sourceLabel)
 	}
 
 	children := tree[key]
@@ -154,16 +193,14 @@ func printNode(tree map[string][]string, key string, prefix string, visited map[
 	visited[key] = true
 
 	newPrefix := prefix
-	if !isRoot {
-		if isLast {
-			newPrefix += "    "
-		} else {
-			newPrefix += "│   "
-		}
+	if isLast {
+		newPrefix += "    "
+	} else {
+		newPrefix += "│   "
 	}
 
 	for i, child := range children {
-		printNode(tree, child, newPrefix, visited, i == len(children)-1, false)
+		printNodeWithSource(tree, sourceMap, child, newPrefix, visited, i == len(children)-1, false)
 	}
 }
 
@@ -187,16 +224,19 @@ func savePlugins(plugins []Plugin) error {
 	return nil
 }
 
-// loadInstalledPlugins reads the installed.json file
-func loadInstalledPlugins() ([]Plugin, error) {
-	data, err := os.ReadFile(".plugins/installed.json")
+// loadPluginsFromFile reads plugins from a specific JSON file
+func loadPluginsFromFile(filePath string) ([]Plugin, error) {
+	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("error reading .plugins/installed.json: %v", err)
+		if os.IsNotExist(err) {
+			return []Plugin{}, nil // Return empty list if file doesn't exist
+		}
+		return nil, fmt.Errorf("error reading %s: %v", filePath, err)
 	}
 
 	var plugins []Plugin
 	if err := json.Unmarshal(data, &plugins); err != nil {
-		return nil, fmt.Errorf("error parsing installed.json: %v", err)
+		return nil, fmt.Errorf("error parsing %s: %v", filePath, err)
 	}
 
 	return plugins, nil
@@ -205,23 +245,30 @@ func loadInstalledPlugins() ([]Plugin, error) {
 func main() {
 	fmt.Println("==> Resolving plugin requirements")
 
-	// Load plugins from installed.json
-	plugins, err := loadInstalledPlugins()
+	// Load plugins from custom and storefront only (ignore baseline)
+	customPlugins, err := loadPluginsFromFile("custom/plugins.json")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "FAILED: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Loaded %d plugins from installed.json\n", len(plugins))
-
-	// Resolve all requirements recursively
-	resolved, err := resolveRequirements(plugins)
+	storefrontPlugins, err := loadPluginsFromFile("storefront/plugins.json")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "FAILED: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Total plugins after resolving requirements: %d\n", len(resolved))
+	fmt.Printf("Loaded %d plugins from custom/plugins.json\n", len(customPlugins))
+	fmt.Printf("Loaded %d plugins from storefront/plugins.json\n", len(storefrontPlugins))
+
+	// Resolve all requirements recursively (baseline is empty)
+	resolved, err := resolveRequirements([]Plugin{}, customPlugins, storefrontPlugins)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "FAILED: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\nTotal plugins after resolving requirements: %d\n", len(resolved))
 
 	// Save back to installed.json
 	if err := savePlugins(resolved); err != nil {
