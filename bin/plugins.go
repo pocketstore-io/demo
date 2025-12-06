@@ -415,7 +415,7 @@ func installPlugins() error {
 
 		_ = os.RemoveAll(destDir)
 
-		status, err := DownloadFile(zipPath, url)
+		_, err := DownloadFile(zipPath, url)
 		if err != nil {
 			_ = os.Remove(zipPath)
 			return fmt.Errorf("failed to download %s: %v", url, err)
@@ -460,9 +460,8 @@ func installPlugins() error {
 			}
 		}
 
-		// Minimal two-line output (keeps same format: version printed, status printed)
-		fmt.Printf("%s/%s version=%s\n", plugin.Vendor, plugin.Name, plugin.Version)
-		fmt.Printf("status: %d\n", status)
+		// One-line success output
+		fmt.Printf("✓ %s/%s (version=%s)\n", plugin.Vendor, plugin.Name, plugin.Version)
 	}
 
 	// Write back resolved metadata INCLUDING revision field
@@ -479,9 +478,6 @@ func installPlugins() error {
 
 // Step 3: mergePluginFiles merges plugin files into the storefront directory
 func mergePluginFiles() error {
-	fmt.Println("\n==> Step 3: Merging plugin files")
-
-	fmt.Println("Reading plugin root directory:", pluginRoot)
 	vendorDirs, err := os.ReadDir(pluginRoot)
 	if err != nil {
 		return fmt.Errorf("failed to read plugin root: %v", err)
@@ -538,8 +534,6 @@ func mergePluginFiles() error {
 
 	// Copy folders for each plugin
 	for _, plugin := range plugins {
-		fmt.Printf("Processing plugin: %s/%s (prio: %d)\n", plugin.Vendor, plugin.Name, plugin.Prio)
-
 		for _, d := range dirsToCopy {
 			src := filepath.Join(plugin.BasePath, d)
 
@@ -553,13 +547,12 @@ func mergePluginFiles() error {
 
 			if exists(src) {
 				finalDst := filepath.Join("storefront", dst)
-				fmt.Printf("  Copying %s → %s\n", src, finalDst)
-
 				if err := copyDir(src, finalDst); err != nil {
 					fmt.Printf("  Error copying %s: %v\n", d, err)
 				}
 			}
 		}
+		fmt.Printf("✓ %s/%s (prio: %d)\n", plugin.Vendor, plugin.Name, plugin.Prio)
 	}
 	return nil
 }
@@ -582,6 +575,4 @@ func main() {
 		fmt.Fprintf(os.Stderr, "FAILED: %v\n", err)
 		os.Exit(1)
 	}
-
-	fmt.Println("\n==> All plugin steps complete!")
 }
