@@ -18,11 +18,14 @@ type Plugin struct {
 	Name     string `json:"name"`
 	Vendor   string `json:"vendor"`
 	Prio     int    `json:"prio,omitempty"`
+	Revision string `json:"revision,omitempty"`
 	BasePath string `json:"-"`
 }
 
 type PluginJson struct {
-	Prio int `json:"prio"`
+	Prio     int    `json:"prio"`
+	Revision string `json:"revision,omitempty"`
+	Version  string `json:"version,omitempty"`
 }
 
 var (
@@ -49,15 +52,24 @@ func exists(path string) bool {
 	return err == nil
 }
 
-// readPrio reads the priority from a plugin.json file
-func readPrio(jsonPath string) int {
+// readPluginMeta reads plugin.json and returns PluginJson metadata
+func readPluginMeta(jsonPath string) (PluginJson, error) {
 	file, err := os.Open(jsonPath)
 	if err != nil {
-		return 0
+		return PluginJson{}, err
 	}
 	defer file.Close()
 	var pj PluginJson
 	if err := json.NewDecoder(file).Decode(&pj); err != nil {
+		return PluginJson{}, err
+	}
+	return pj, nil
+}
+
+// readPrio reads the priority from a plugin.json file (keeps legacy name)
+func readPrio(jsonPath string) int {
+	pj, err := readPluginMeta(jsonPath)
+	if err != nil {
 		return 0
 	}
 	return pj.Prio
@@ -100,34 +112,29 @@ func copyFile(src, dst string) error {
 }
 
 // DownloadFile downloads a file from the given URL and saves it to the given filepath
-func DownloadFile(filepathDest string, url string) error {
-	fmt.Printf("[debug] DownloadFile called: url=%s dest=%s\n", url, filepathDest)
+// returns the HTTP status code and an error (if any)
+func DownloadFile(filepathDest string, url string) (int, error) {
 	out, err := os.Create(filepathDest)
 	if err != nil {
-		fmt.Printf("[error] failed to create file %s: %v\n", filepathDest, err)
-		return err
+		return 0, err
 	}
 	defer out.Close()
 
 	resp, err := http.Get(url)
 	if err != nil {
-		fmt.Printf("[error] http.Get failed for %s: %v\n", url, err)
-		return err
+		return 0, err
 	}
 	defer resp.Body.Close()
 
-	fmt.Printf("[debug] http.Get response status: %s for url=%s\n", resp.Status, url)
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("bad status: %s", resp.Status)
+	status := resp.StatusCode
+	if status != http.StatusOK {
+		return status, fmt.Errorf("bad status: %s", resp.Status)
 	}
 
-	written, err := io.Copy(out, resp.Body)
-	if err != nil {
-		fmt.Printf("[error] io.Copy failed while writing %s: %v\n", filepathDest, err)
-		return err
+	if _, err = io.Copy(out, resp.Body); err != nil {
+		return status, err
 	}
-	fmt.Printf("[debug] DownloadFile wrote %d bytes to %s\n", written, filepathDest)
-	return nil
+	return status, nil
 }
 
 // Unzip extracts a zip archive to a specified destination
@@ -197,20 +204,14 @@ func Unzip(src, dest string) error {
 // FetchLatestVersion queries the plugin API for the latest version string
 func FetchLatestVersion(vendor, name string) (string, error) {
 	url := fmt.Sprintf("https://download.pocketstore.io/d/plugins/%s/%s/latest.zip", vendor, name)
-	fmt.Printf("[debug] FetchLatestVersion HEAD %s\n", url)
 	resp, err := http.Head(url)
 	if err != nil {
-		fmt.Printf("[error] http.Head failed for %s: %v\n", url, err)
 		return "", err
 	}
 	defer resp.Body.Close()
-
-	fmt.Printf("[debug] HEAD response status for %s: %s\n", url, resp.Status)
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("failed to fetch latest: %s", resp.Status)
 	}
-
-	// Just return "latest"
 	return "latest", nil
 }
 
@@ -220,7 +221,6 @@ func isSpecialLatestVersion(version string) bool {
 	if version == "latest" {
 		return true
 	}
-	// Match version pattern like 0.0.1.3 (four numbers separated by dots)
 	matched, _ := regexp.MatchString(`^\d+\.\d+\.\d+\.\d+$`, version)
 	return matched
 }
@@ -245,9 +245,10 @@ func mergePlugins() error {
 	for _, p := range merged {
 		key := p.Name + ":" + p.Vendor
 		unique[key] = Plugin{
-			Version: p.Version,
-			Name:    p.Name,
-			Vendor:  p.Vendor,
+			Version:  p.Version,
+			Name:     p.Name,
+			Vendor:   p.Vendor,
+			Revision: p.Revision,
 		}
 	}
 
@@ -280,16 +281,15 @@ func mergePlugins() error {
 		return fmt.Errorf("error writing to %s: %v", outputFile, err)
 	}
 
-	fmt.Printf("Unique merged plugin list written to %s\n", outputFile)
 	return nil
 }
 
 // Step 2: installPlugins downloads and installs plugins from the installed.json file
+// Clean, minimal output: per plugin two lines:
+// vendor/name version=<resolved-version>
+// status: <http-status-code>
 func installPlugins() error {
-	fmt.Println("\n==> Step 2: Installing plugins")
-
 	installedPath := ".plugins/installed.json"
-	fmt.Printf("[debug] reading installed plugins file: %s\n", installedPath)
 	pluginsJSON, err := os.ReadFile(installedPath)
 	if err != nil {
 		return fmt.Errorf("error reading installed plugins file: %v", err)
@@ -299,63 +299,73 @@ func installPlugins() error {
 	if err := json.Unmarshal(pluginsJSON, &plugins); err != nil {
 		return fmt.Errorf("error parsing plugins JSON: %v", err)
 	}
-	fmt.Printf("[debug] parsed %d plugins from %s\n", len(plugins), installedPath)
-	for i, p := range plugins {
-		fmt.Printf("[debug] plugin[%d] = %+v\n", i, p)
-	}
 
 	cacheDir := ".plugins/cache"
-	fmt.Printf("[debug] ensuring cache dir exists: %s\n", cacheDir)
 	if err := os.MkdirAll(cacheDir, os.ModePerm); err != nil {
 		return fmt.Errorf("error creating cache directory: %v", err)
 	}
 
-	for _, plugin := range plugins {
-		fmt.Printf("[debug] processing plugin: vendor=%s name=%s version=%s\n", plugin.Vendor, plugin.Name, plugin.Version)
+	for i := range plugins {
+		plugin := &plugins[i]
 		pluginVersion := plugin.Version
-		// Remove v- prefix if it exists and version is "v-latest" or "v-LATEST" etc
+
 		if strings.ToLower(pluginVersion) == "v-latest" {
-			fmt.Printf("[debug] normalizing v-latest -> latest for %s/%s\n", plugin.Vendor, plugin.Name)
 			pluginVersion = "latest"
 		}
 		if isSpecialLatestVersion(pluginVersion) {
-			fmt.Printf("[debug] pluginVersion %q considered special/latest for %s/%s\n", pluginVersion, plugin.Vendor, plugin.Name)
 			ver, err := FetchLatestVersion(plugin.Vendor, plugin.Name)
 			if err != nil {
 				return fmt.Errorf("failed to fetch latest version for %s/%s: %v", plugin.Vendor, plugin.Name, err)
 			}
 			pluginVersion = ver
-			fmt.Printf("[debug] Resolved latest version for %s/%s: %s\n", plugin.Vendor, plugin.Name, pluginVersion)
 		}
+		plugin.Version = pluginVersion
 
 		url := fmt.Sprintf("https://download.pocketstore.io/d/plugins/%s/%s/%s.zip", plugin.Vendor, plugin.Name, pluginVersion)
 		zipPath := filepath.Join(cacheDir, fmt.Sprintf("%s-%s-%s.zip", plugin.Vendor, plugin.Name, pluginVersion))
-
-		// Ensure each plugin is extracted into its own directory under .plugins/repos/<vendor>/<name>
 		destDir := filepath.Join(".plugins", "repos", plugin.Vendor, plugin.Name)
-		fmt.Printf("[debug] plugin destination dir: %s\n", destDir)
 
-		// Remove any existing contents in the plugin destDir so old files do not persist
-		if err := os.RemoveAll(destDir); err != nil {
-			// Non-fatal: warn and continue
-			fmt.Printf("[warn] failed to remove existing dest dir %s: %v\n", destDir, err)
-		}
+		_ = os.RemoveAll(destDir)
 
-		fmt.Printf("[info] Downloading %s...\n", url)
-		if err := DownloadFile(zipPath, url); err != nil {
+		status, err := DownloadFile(zipPath, url)
+		if err != nil {
 			_ = os.Remove(zipPath)
 			return fmt.Errorf("failed to download %s: %v", url, err)
 		}
 
-		fmt.Printf("[info] Unzipping to %s...\n", destDir)
 		if err := Unzip(zipPath, destDir); err != nil {
 			_ = os.Remove(zipPath)
 			_ = os.RemoveAll(destDir)
 			return fmt.Errorf("failed to unzip %s: %v", zipPath, err)
 		}
 
-		fmt.Printf("[info] Installed %s/%s %s into %s\n", plugin.Vendor, plugin.Name, pluginVersion, destDir)
+		pluginJSONPath := filepath.Join(destDir, "plugin.json")
+		if exists(pluginJSONPath) {
+			if pj, err := readPluginMeta(pluginJSONPath); err == nil {
+				if pj.Revision != "" {
+					plugin.Revision = pj.Revision
+				} else if pj.Version != "" {
+					plugin.Revision = pj.Version
+				}
+				if pj.Version != "" {
+					plugin.Version = pj.Version
+				}
+			}
+		}
+
+		// Minimal two-line output
+		fmt.Printf("%s/%s version=%s\n", plugin.Vendor, plugin.Name, plugin.Version)
+		fmt.Printf("status: %d\n", status)
 	}
+
+	out, err := json.MarshalIndent(plugins, "", "  ")
+	if err != nil {
+		return fmt.Errorf("error marshaling updated installed plugins: %v", err)
+	}
+	if err := os.WriteFile(installedPath, out, 0644); err != nil {
+		return fmt.Errorf("error writing updated installed plugins to %s: %v", installedPath, err)
+	}
+
 	return nil
 }
 
@@ -453,7 +463,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Step 2: Install plugins
+	// Step 2: Install plugins (clean output)
 	if err := installPlugins(); err != nil {
 		fmt.Fprintf(os.Stderr, "FAILED: %v\n", err)
 		os.Exit(1)
