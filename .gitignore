@@ -2,6 +2,7 @@ storefront
 
 .plugins/cache
 .plugins/repos
+.plugins/audit
 
 # Ignore Jetbrains Idea Folder
 .idea
