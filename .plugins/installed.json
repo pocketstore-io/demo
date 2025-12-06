@@ -81,12 +81,12 @@
   },
   {
     "version": "latest",
-    "name": "product-tabs",
+    "name": "product-reviews",
     "vendor": "pocketstore-io"
   },
   {
     "version": "latest",
-    "name": "reviews",
+    "name": "product-tabs",
     "vendor": "pocketstore-io"
   },
   {
