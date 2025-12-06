@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/zip"
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -18,7 +19,7 @@ type Plugin struct {
 	Name     string `json:"name"`
 	Vendor   string `json:"vendor"`
 	Prio     int    `json:"prio,omitempty"`
-	Revision string `json:"-"` // keep internally but do not include in installed.json
+	Revision string `json:"revision,omitempty"` // include revision in installed.json
 	BasePath string `json:"-"`
 }
 
@@ -225,6 +226,96 @@ func isSpecialLatestVersion(version string) bool {
 	return matched
 }
 
+// tryReadGitHead tries to read a commit hash from a .git directory inside pluginDir
+// returns "" if not found or any error occurs.
+func tryReadGitHead(pluginDir string) string {
+	gitHeadPath := filepath.Join(pluginDir, ".git", "HEAD")
+	b, err := os.ReadFile(gitHeadPath)
+	if err != nil {
+		// no .git/HEAD present
+		return ""
+	}
+	head := strings.TrimSpace(string(b))
+	// If HEAD is a ref, try to read the ref file
+	if strings.HasPrefix(head, "ref: ") {
+		ref := strings.TrimPrefix(head, "ref: ")
+		refPath := filepath.Join(pluginDir, ".git", filepath.FromSlash(ref))
+		if rb, err := os.ReadFile(refPath); err == nil {
+			return strings.TrimSpace(string(rb))
+		}
+		// try packed-refs fallback
+		packedPath := filepath.Join(pluginDir, ".git", "packed-refs")
+		if pb, err := os.ReadFile(packedPath); err == nil {
+			lines := strings.Split(string(pb), "\n")
+			for _, line := range lines {
+				line = strings.TrimSpace(line)
+				if line == "" || strings.HasPrefix(line, "#") {
+					continue
+				}
+				parts := strings.Fields(line)
+				if len(parts) == 2 && parts[1] == ref {
+					return parts[0]
+				}
+			}
+		}
+		return ""
+	}
+	// HEAD contains a raw commit SHA
+	if head != "" {
+		return head
+	}
+	return ""
+}
+
+// computeDirSHA1 computes a SHA1 over the files contained in dir in a deterministic way
+// Returns hex-encoded sha1. This is used as a fallback "commit-like" identifier when no
+// revision is provided by plugin.json and no .git data is present.
+func computeDirSHA1(dir string) (string, error) {
+	var files []string
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		// skip common volatile files
+		base := filepath.Base(path)
+		if base == ".DS_Store" || base == "Thumbs.db" {
+			return nil
+		}
+		files = append(files, path)
+		return nil
+	})
+	if err != nil {
+		return "", err
+	}
+	sort.Strings(files)
+	h := sha1.New()
+	for _, f := range files {
+		rel, _ := filepath.Rel(dir, f)
+		// include filename to avoid collisions
+		if _, err := h.Write([]byte(rel)); err != nil {
+			return "", err
+		}
+		if _, err := h.Write([]byte{0}); err != nil {
+			return "", err
+		}
+		data, err := os.ReadFile(f)
+		if err != nil {
+			return "", err
+		}
+		if _, err := h.Write(data); err != nil {
+			return "", err
+		}
+		if _, err := h.Write([]byte{0}); err != nil {
+			return "", err
+		}
+	}
+	sum := h.Sum(nil)
+	return fmt.Sprintf("%x", sum), nil
+}
+
 // Step 1: mergePlugins merges baseline and custom plugins into a unique list
 func mergePlugins() error {
 	baselinePlugins, err := readPluginsFromFile("baseline/plugins.json")
@@ -336,12 +427,18 @@ func installPlugins() error {
 			return fmt.Errorf("failed to unzip %s: %v", zipPath, err)
 		}
 
+		// Attempt to determine revision/commit hash:
+		// Priority:
+		// 1) plugin.json "revision" (already handled below)
+		// 2) .git/HEAD ref inside the extracted destDir (if present)
+		// 3) deterministic SHA1 computed from files as a fallback
 		pluginJSONPath := filepath.Join(destDir, "plugin.json")
 		if exists(pluginJSONPath) {
 			if pj, err := readPluginMeta(pluginJSONPath); err == nil {
 				if pj.Revision != "" {
 					plugin.Revision = pj.Revision
 				} else if pj.Version != "" {
+					// keep previous behavior: use version if provided as fallback
 					plugin.Revision = pj.Version
 				}
 				if pj.Version != "" {
@@ -350,12 +447,25 @@ func installPlugins() error {
 			}
 		}
 
-		// Minimal two-line output
+		if plugin.Revision == "" {
+			// try to read .git metadata if the zip included it
+			if rev := tryReadGitHead(destDir); rev != "" {
+				plugin.Revision = rev
+			}
+		}
+		if plugin.Revision == "" {
+			// fallback to deterministic dir hash
+			if rev, err := computeDirSHA1(destDir); err == nil {
+				plugin.Revision = rev
+			}
+		}
+
+		// Minimal two-line output (keeps same format: version printed, status printed)
 		fmt.Printf("%s/%s version=%s\n", plugin.Vendor, plugin.Name, plugin.Version)
 		fmt.Printf("status: %d\n", status)
 	}
 
-	// Write back resolved metadata BUT without revision field because Plugin.Revision has json:"-"
+	// Write back resolved metadata INCLUDING revision field
 	out, err := json.MarshalIndent(plugins, "", "  ")
 	if err != nil {
 		return fmt.Errorf("error marshaling updated installed plugins: %v", err)
