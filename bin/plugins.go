@@ -18,7 +18,7 @@ type Plugin struct {
 	Name     string `json:"name"`
 	Vendor   string `json:"vendor"`
 	Prio     int    `json:"prio,omitempty"`
-	Revision string `json:"revision,omitempty"`
+	Revision string `json:"-"` // keep internally but do not include in installed.json
 	BasePath string `json:"-"`
 }
 
@@ -227,8 +227,6 @@ func isSpecialLatestVersion(version string) bool {
 
 // Step 1: mergePlugins merges baseline and custom plugins into a unique list
 func mergePlugins() error {
-	fmt.Println("==> Step 1: Merging plugins")
-
 	baselinePlugins, err := readPluginsFromFile("baseline/plugins.json")
 	if err != nil {
 		return fmt.Errorf("error reading baseline/plugins.json: %v", err)
@@ -245,10 +243,9 @@ func mergePlugins() error {
 	for _, p := range merged {
 		key := p.Name + ":" + p.Vendor
 		unique[key] = Plugin{
-			Version:  p.Version,
-			Name:     p.Name,
-			Vendor:   p.Vendor,
-			Revision: p.Revision,
+			Version: p.Version,
+			Name:    p.Name,
+			Vendor:  p.Vendor,
 		}
 	}
 
@@ -358,6 +355,7 @@ func installPlugins() error {
 		fmt.Printf("status: %d\n", status)
 	}
 
+	// Write back resolved metadata BUT without revision field because Plugin.Revision has json:"-"
 	out, err := json.MarshalIndent(plugins, "", "  ")
 	if err != nil {
 		return fmt.Errorf("error marshaling updated installed plugins: %v", err)
