@@ -13,5 +13,20 @@
     "name": "homepage-demo",
     "vendor": "pocketstore-io",
     "version": "latest"
+  },
+  {
+    "name": "issue-reporting",
+    "vendor": "pocketstore-io",
+    "version": "latest"
+  },
+  {
+    "name": "bug-reporting",
+    "vendor": "pocketstore-io",
+    "version": "latest"
+  },
+  {
+    "name": "hello-world",
+    "vendor": "pocketstore-io",
+    "version": "latest"
   }
 ]
