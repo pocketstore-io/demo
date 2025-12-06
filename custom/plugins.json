@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "name": "disclaimer-demo",
+    "vendor": "pocketstore-io",
+    "version": "latest"
+  },
+  {
+    "name": "impressum-demo",
+    "vendor": "pocketstore-io",
+    "version": "latest"
+  },
+  {
+    "name": "homepage-demo",
+    "vendor": "pocketstore-io",
+    "version": "latest"
+  }
+]
