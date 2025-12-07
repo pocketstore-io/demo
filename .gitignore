@@ -9,3 +9,5 @@ storefront
 
 # Ignore node dependencies
 node_modules
+
+.env
