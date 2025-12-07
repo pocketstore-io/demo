@@ -1,69 +1,9 @@
 [
   {
     "version": "latest",
-    "name": "admin-dashboard",
-    "vendor": "pocketstore-io",
-    "revision": "66691405c0b99c056e4e9a7e20813bc0829ff23b"
-  },
-  {
-    "version": "latest",
-    "name": "backtotop",
-    "vendor": "pocketstore-io",
-    "revision": "600a85f97b1572acce288e745ab85d29ab611fbd"
-  },
-  {
-    "version": "latest",
-    "name": "breadcrumb",
-    "vendor": "pocketstore-io",
-    "revision": "7810586216aaacaad98d4872a373edfdd5ddc38e"
-  },
-  {
-    "version": "latest",
-    "name": "bug-reporting",
-    "vendor": "pocketstore-io",
-    "revision": "2bfdb427d7912e3f65c2f845ed72ae08c1020d83"
-  },
-  {
-    "version": "latest",
-    "name": "catalog-product",
-    "vendor": "pocketstore-io",
-    "revision": "45e0464ac240a386de60a90db92cb180bb3f1037"
-  },
-  {
-    "version": "0.0.1",
-    "name": "checkout",
-    "vendor": "pocketstore-io",
-    "revision": "0.0.1"
-  },
-  {
-    "version": "latest",
-    "name": "cookie-banner",
-    "vendor": "pocketstore-io",
-    "revision": "6ad857858596deee4ef62646b78ede01f11a45d2"
-  },
-  {
-    "version": "latest",
-    "name": "customer",
-    "vendor": "pocketstore-io",
-    "revision": "2d37c5a74944363fb058617002ffc96f388e43d0"
-  },
-  {
-    "version": "latest",
     "name": "disclaimer-demo",
     "vendor": "pocketstore-io",
     "revision": "94226143799c15f2e6c4a61b3d8e79e61c149f40"
-  },
-  {
-    "version": "0.0.1.2",
-    "name": "hello-world",
-    "vendor": "pocketstore-io",
-    "revision": "0.0.1.2"
-  },
-  {
-    "version": "latest",
-    "name": "homepage-demo",
-    "vendor": "pocketstore-io",
-    "revision": "7d68e6e094a021b890d92a2ce62a4932c185c05f"
   },
   {
     "version": "latest",
@@ -73,9 +13,33 @@
   },
   {
     "version": "latest",
+    "name": "homepage-demo",
+    "vendor": "pocketstore-io",
+    "revision": "7d68e6e094a021b890d92a2ce62a4932c185c05f"
+  },
+  {
+    "version": "latest",
     "name": "issue-reporting",
     "vendor": "pocketstore-io",
     "revision": "9cf643c1a481a7295f393a3d163d636c312ec5bc"
+  },
+  {
+    "version": "latest",
+    "name": "bug-reporting",
+    "vendor": "pocketstore-io",
+    "revision": "2bfdb427d7912e3f65c2f845ed72ae08c1020d83"
+  },
+  {
+    "version": "0.0.1.2",
+    "name": "hello-world",
+    "vendor": "pocketstore-io",
+    "revision": "0.0.1.2"
+  },
+  {
+    "version": "latest",
+    "name": "admin-dashboard",
+    "vendor": "pocketstore-io",
+    "revision": "66691405c0b99c056e4e9a7e20813bc0829ff23b"
   },
   {
     "version": "latest",
@@ -85,9 +49,45 @@
   },
   {
     "version": "latest",
-    "name": "product-details",
+    "name": "backtotop",
     "vendor": "pocketstore-io",
-    "revision": "fd168d190a5ebe161e3dd58bb1050bd1801f0734"
+    "revision": "600a85f97b1572acce288e745ab85d29ab611fbd"
+  },
+  {
+    "version": "latest",
+    "name": "toasts",
+    "vendor": "pocketstore-io",
+    "revision": "7786e305dea29fc52cb2854a0838a9629e536019"
+  },
+  {
+    "version": "latest",
+    "name": "breadcrumb",
+    "vendor": "pocketstore-io",
+    "revision": "7810586216aaacaad98d4872a373edfdd5ddc38e"
+  },
+  {
+    "version": "0.0.1",
+    "name": "checkout",
+    "vendor": "pocketstore-io",
+    "revision": "0.0.1"
+  },
+  {
+    "version": "latest",
+    "name": "customer",
+    "vendor": "pocketstore-io",
+    "revision": "2d37c5a74944363fb058617002ffc96f388e43d0"
+  },
+  {
+    "version": "latest",
+    "name": "catalog-product",
+    "vendor": "pocketstore-io",
+    "revision": "45e0464ac240a386de60a90db92cb180bb3f1037"
+  },
+  {
+    "version": "latest",
+    "name": "cookie-banner",
+    "vendor": "pocketstore-io",
+    "revision": "6ad857858596deee4ef62646b78ede01f11a45d2"
   },
   {
     "version": "latest",
@@ -97,8 +97,20 @@
   },
   {
     "version": "latest",
-    "name": "toasts",
+    "name": "product-details",
     "vendor": "pocketstore-io",
-    "revision": "7786e305dea29fc52cb2854a0838a9629e536019"
+    "revision": "fd168d190a5ebe161e3dd58bb1050bd1801f0734"
+  },
+  {
+    "version": "latest",
+    "name": "image-slider",
+    "vendor": "pocketstore-io",
+    "revision": "22771aa0c2bed1423002d71634dfcb19915f0011"
+  },
+  {
+    "version": "latest",
+    "name": "product-reviews",
+    "vendor": "pocketstore-io",
+    "revision": "42a4a5dd093989f9edb13635f5cea7e17cc13528"
   }
 ]
