@@ -21,12 +21,14 @@ type Plugin struct {
 	Prio     int    `json:"prio,omitempty"`
 	Revision string `json:"revision,omitempty"` // include revision in installed.json
 	BasePath string `json:"-"`
+	Source   string `json:"-"` // Track source: "baseline", "custom", "storefront", or parent plugin key
 }
 
 type PluginJson struct {
-	Prio     int    `json:"prio"`
-	Revision string `json:"revision,omitempty"`
-	Version  string `json:"version,omitempty"`
+	Prio         int      `json:"prio"`
+	Revision     string   `json:"revision,omitempty"`
+	Version      string   `json:"version,omitempty"`
+	Requirements []string `json:"requirements,omitempty"`
 }
 
 var (
@@ -54,8 +56,9 @@ func exists(path string) bool {
 }
 
 // readPluginMeta reads plugin.json and returns PluginJson metadata
-func readPluginMeta(jsonPath string) (PluginJson, error) {
-	file, err := os.Open(jsonPath)
+func readPluginMeta(vendor, name string) (PluginJson, error) {
+	pluginPath := filepath.Join(".plugins", "repos", vendor, name, "plugin.json")
+	file, err := os.Open(pluginPath)
 	if err != nil {
 		return PluginJson{}, err
 	}
@@ -68,12 +71,27 @@ func readPluginMeta(jsonPath string) (PluginJson, error) {
 }
 
 // readPrio reads the priority from a plugin.json file (keeps legacy name)
-func readPrio(jsonPath string) int {
-	pj, err := readPluginMeta(jsonPath)
+func readPrio(vendor, name string) int {
+	pj, err := readPluginMeta(vendor, name)
 	if err != nil {
 		return 0
 	}
 	return pj.Prio
+}
+
+// parsePluginURL extracts vendor and name from URLs like:
+// "github.com/pocketstore-io/plugin-image-slider" -> ("pocketstore-io", "image-slider")
+// "github.com/pocketstore-io/reviews" -> ("pocketstore-io", "reviews")
+func parsePluginURL(url string) (vendor, name string, ok bool) {
+	parts := strings.Split(url, "/")
+	if len(parts) < 3 {
+		return "", "", false
+	}
+	vendor = parts[len(parts)-2]
+	name = parts[len(parts)-1]
+	// Remove "plugin-" prefix if present
+	name = strings.TrimPrefix(name, "plugin-")
+	return vendor, name, true
 }
 
 // copyDir recursively copies a directory
@@ -316,7 +334,140 @@ func computeDirSHA1(dir string) (string, error) {
 	return fmt.Sprintf("%x", sum), nil
 }
 
-// Step 1: mergePlugins merges baseline and custom plugins into a unique list
+// resolveRequirements recursively resolves all plugin requirements
+func resolveRequirements(baselinePlugins, customPlugins, storefrontPlugins []Plugin) ([]Plugin, error) {
+	seen := make(map[string]bool)
+	result := make([]Plugin, 0)
+	queue := make([]Plugin, 0)
+	dependencyTree := make(map[string][]string)
+	sourceMap := make(map[string]string)
+
+	// Helper to add plugins from a source
+	addPlugins := func(plugins []Plugin, source string) {
+		for _, p := range plugins {
+			key := p.Vendor + "/" + p.Name
+			if !seen[key] {
+				p.Source = source
+				seen[key] = true
+				queue = append(queue, p)
+				sourceMap[key] = source
+			}
+		}
+	}
+
+	// Add plugins in priority order
+	addPlugins(baselinePlugins, "baseline")
+	addPlugins(customPlugins, "custom")
+	addPlugins(storefrontPlugins, "storefront")
+
+	// BFS traversal to resolve all dependencies
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+		result = append(result, current)
+
+		currentKey := current.Vendor + "/" + current.Name
+
+		// Try to read plugin.json for requirements
+		meta, err := readPluginMeta(current.Vendor, current.Name)
+		if err != nil {
+			// Plugin not yet downloaded, will be downloaded in install phase
+			continue
+		}
+
+		// Process requirements
+		for _, req := range meta.Requirements {
+			vendor, name, ok := parsePluginURL(req)
+			if !ok {
+				fmt.Printf("Warning: invalid requirement URL: %s\n", req)
+				continue
+			}
+
+			key := vendor + "/" + name
+			dependencyTree[currentKey] = append(dependencyTree[currentKey], key)
+
+			if seen[key] {
+				continue // Already processed or queued
+			}
+
+			seen[key] = true
+			newPlugin := Plugin{
+				Vendor:  vendor,
+				Name:    name,
+				Version: "latest",
+				Source:  currentKey,
+			}
+			sourceMap[key] = currentKey
+			queue = append(queue, newPlugin)
+			fmt.Printf("  [%s] requires → %s\n", currentKey, key)
+		}
+	}
+
+	// Print dependency tree with sources
+	if len(dependencyTree) > 0 {
+		fmt.Println("\n==> Dependency Tree:")
+		visited := make(map[string]bool)
+
+		printTree := func(plugins []Plugin, label string) {
+			if len(plugins) > 0 {
+				fmt.Printf("\n📦 FROM %s:\n", label)
+				for _, root := range plugins {
+					key := root.Vendor + "/" + root.Name
+					printNodeWithSource(dependencyTree, sourceMap, key, "  ", visited, true, true)
+				}
+			}
+		}
+
+		printTree(baselinePlugins, "baseline/plugins.json")
+		printTree(customPlugins, "custom/plugins.json")
+		printTree(storefrontPlugins, "storefront/plugins.json")
+	}
+
+	return result, nil
+}
+
+// printNodeWithSource prints a visual tree node with source information
+func printNodeWithSource(tree map[string][]string, sourceMap map[string]string, key string, prefix string, visited map[string]bool, isLast bool, isRoot bool) {
+	marker := "├──"
+	if isLast {
+		marker = "└──"
+	}
+
+	if isRoot {
+		fmt.Printf("%s%s\n", prefix, key)
+	} else {
+		source := sourceMap[key]
+		sourceLabel := ""
+		if source != "" && source != "baseline" && source != "custom" && source != "storefront" {
+			sourceLabel = fmt.Sprintf(" (required by: %s)", source)
+		}
+		fmt.Printf("%s%s %s%s\n", prefix, marker, key, sourceLabel)
+	}
+
+	children := tree[key]
+	if len(children) == 0 {
+		return
+	}
+
+	// Prevent infinite recursion on circular dependencies
+	if visited[key] {
+		return
+	}
+	visited[key] = true
+
+	newPrefix := prefix
+	if isLast {
+		newPrefix += "    "
+	} else {
+		newPrefix += "│   "
+	}
+
+	for i, child := range children {
+		printNodeWithSource(tree, sourceMap, child, newPrefix, visited, i == len(children)-1, false)
+	}
+}
+
+// Step 1: mergePlugins merges baseline, custom and storefront plugins and resolves requirements
 func mergePlugins() error {
 	baselinePlugins, err := readPluginsFromFile("baseline/plugins.json")
 	if err != nil {
@@ -328,33 +479,28 @@ func mergePlugins() error {
 		return fmt.Errorf("error reading custom/plugins.json: %v", err)
 	}
 
-	merged := append(baselinePlugins, customPlugins...)
-
-	unique := make(map[string]Plugin)
-	for _, p := range merged {
-		key := p.Name + ":" + p.Vendor
-		unique[key] = Plugin{
-			Version: p.Version,
-			Name:    p.Name,
-			Vendor:  p.Vendor,
+	storefrontPlugins, err := readPluginsFromFile("storefront/plugins.json")
+	if err != nil {
+		if os.IsNotExist(err) {
+			storefrontPlugins = []Plugin{}
+		} else {
+			return fmt.Errorf("error reading storefront/plugins.json: %v", err)
 		}
 	}
 
-	// Convert map to slice
-	result := make([]Plugin, 0, len(unique))
-	for _, p := range unique {
-		result = append(result, p)
+	fmt.Printf("Loaded %d plugins from baseline/plugins.json\n", len(baselinePlugins))
+	fmt.Printf("Loaded %d plugins from custom/plugins.json\n", len(customPlugins))
+	fmt.Printf("Loaded %d plugins from storefront/plugins.json\n", len(storefrontPlugins))
+
+	// Resolve all requirements recursively
+	resolved, err := resolveRequirements(baselinePlugins, customPlugins, storefrontPlugins)
+	if err != nil {
+		return fmt.Errorf("error resolving requirements: %v", err)
 	}
 
-	// Sort alphabetically by vendor, then by name
-	sort.Slice(result, func(i, j int) bool {
-		if result[i].Vendor == result[j].Vendor {
-			return result[i].Name < result[j].Name
-		}
-		return result[i].Vendor < result[j].Vendor
-	})
+	fmt.Printf("\nTotal plugins after resolving requirements: %d\n", len(resolved))
 
-	out, err := json.MarshalIndent(result, "", "  ")
+	out, err := json.MarshalIndent(resolved, "", "  ")
 	if err != nil {
 		return fmt.Errorf("error marshaling merged plugins: %v", err)
 	}
@@ -400,13 +546,7 @@ func installPlugins() error {
 		if strings.ToLower(pluginVersion) == "v-latest" {
 			pluginVersion = "latest"
 		}
-		if isSpecialLatestVersion(pluginVersion) {
-			ver, err := FetchLatestVersion(plugin.Vendor, plugin.Name)
-			if err != nil {
-				return fmt.Errorf("failed to fetch latest version for %s/%s: %v", plugin.Vendor, plugin.Name, err)
-			}
-			pluginVersion = ver
-		}
+		// Don't check if latest exists, just try to download it
 		plugin.Version = pluginVersion
 
 		url := fmt.Sprintf("https://download.pocketstore.io/d/plugins/%s/%s/%s.zip", plugin.Vendor, plugin.Name, pluginVersion)
@@ -434,7 +574,7 @@ func installPlugins() error {
 		// 3) deterministic SHA1 computed from files as a fallback
 		pluginJSONPath := filepath.Join(destDir, "plugin.json")
 		if exists(pluginJSONPath) {
-			if pj, err := readPluginMeta(pluginJSONPath); err == nil {
+			if pj, err := readPluginMeta(plugin.Vendor, plugin.Name); err == nil {
 				if pj.Revision != "" {
 					plugin.Revision = pj.Revision
 				} else if pj.Version != "" {
@@ -494,7 +634,7 @@ func mergePluginFiles() error {
 
 		pluginJsonPath := filepath.Join(vendorPath, "plugin.json")
 		if exists(pluginJsonPath) {
-			prio := readPrio(pluginJsonPath)
+			prio := readPrio("", vendorEntry.Name())
 			plugins = append(plugins, Plugin{
 				Vendor:   "",
 				Name:     vendorEntry.Name(),
@@ -516,7 +656,7 @@ func mergePluginFiles() error {
 			pluginPath := filepath.Join(vendorPath, p.Name())
 			pluginJsonPath := filepath.Join(pluginPath, "plugin.json")
 			if exists(pluginJsonPath) {
-				prio := readPrio(pluginJsonPath)
+				prio := readPrio(vendorEntry.Name(), p.Name())
 				plugins = append(plugins, Plugin{
 					Vendor:   vendorEntry.Name(),
 					Name:     p.Name(),
@@ -571,6 +711,7 @@ func main() {
 	}
 
 	// Step 3: Merge plugin files into storefront
+	fmt.Println("\n==> Merging plugin files into storefront")
 	if err := mergePluginFiles(); err != nil {
 		fmt.Fprintf(os.Stderr, "FAILED: %v\n", err)
 		os.Exit(1)

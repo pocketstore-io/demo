@@ -1,42 +1,6 @@
 [
   {
     "version": "latest",
-    "name": "disclaimer-demo",
-    "vendor": "pocketstore-io",
-    "revision": "94226143799c15f2e6c4a61b3d8e79e61c149f40"
-  },
-  {
-    "version": "latest",
-    "name": "impressum-demo",
-    "vendor": "pocketstore-io",
-    "revision": "b8c243fccca547e550a4488bb2675979f94ef9ac"
-  },
-  {
-    "version": "latest",
-    "name": "homepage-demo",
-    "vendor": "pocketstore-io",
-    "revision": "7d68e6e094a021b890d92a2ce62a4932c185c05f"
-  },
-  {
-    "version": "latest",
-    "name": "issue-reporting",
-    "vendor": "pocketstore-io",
-    "revision": "9cf643c1a481a7295f393a3d163d636c312ec5bc"
-  },
-  {
-    "version": "latest",
-    "name": "bug-reporting",
-    "vendor": "pocketstore-io",
-    "revision": "2bfdb427d7912e3f65c2f845ed72ae08c1020d83"
-  },
-  {
-    "version": "0.0.1.2",
-    "name": "hello-world",
-    "vendor": "pocketstore-io",
-    "revision": "0.0.1.2"
-  },
-  {
-    "version": "latest",
     "name": "admin-dashboard",
     "vendor": "pocketstore-io",
     "revision": "66691405c0b99c056e4e9a7e20813bc0829ff23b"
@@ -100,6 +64,42 @@
     "name": "product-details",
     "vendor": "pocketstore-io",
     "revision": "fd168d190a5ebe161e3dd58bb1050bd1801f0734"
+  },
+  {
+    "version": "latest",
+    "name": "disclaimer-demo",
+    "vendor": "pocketstore-io",
+    "revision": "94226143799c15f2e6c4a61b3d8e79e61c149f40"
+  },
+  {
+    "version": "latest",
+    "name": "impressum-demo",
+    "vendor": "pocketstore-io",
+    "revision": "b8c243fccca547e550a4488bb2675979f94ef9ac"
+  },
+  {
+    "version": "latest",
+    "name": "homepage-demo",
+    "vendor": "pocketstore-io",
+    "revision": "7d68e6e094a021b890d92a2ce62a4932c185c05f"
+  },
+  {
+    "version": "latest",
+    "name": "issue-reporting",
+    "vendor": "pocketstore-io",
+    "revision": "9cf643c1a481a7295f393a3d163d636c312ec5bc"
+  },
+  {
+    "version": "latest",
+    "name": "bug-reporting",
+    "vendor": "pocketstore-io",
+    "revision": "2bfdb427d7912e3f65c2f845ed72ae08c1020d83"
+  },
+  {
+    "version": "0.0.1.2",
+    "name": "hello-world",
+    "vendor": "pocketstore-io",
+    "revision": "0.0.1.2"
   },
   {
     "version": "latest",
