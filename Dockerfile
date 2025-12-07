@@ -19,8 +19,9 @@ RUN go run bin/sitemap.go
 
 # Install project dependencies
 RUN bun install
+RUN bun run build
 
 # Expose the desired port
 EXPOSE 3000
 
-CMD ["nuxi", "preview"]
+CMD ["bun", "x","nuxi", "preview"]
