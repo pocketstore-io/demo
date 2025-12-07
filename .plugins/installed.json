@@ -67,6 +67,12 @@
   },
   {
     "version": "latest",
+    "name": "i18n",
+    "vendor": "pocketstore-io",
+    "revision": "1b473094c4d0ef2f96481b0b02e5293e608054a1"
+  },
+  {
+    "version": "latest",
     "name": "disclaimer-demo",
     "vendor": "pocketstore-io",
     "revision": "94226143799c15f2e6c4a61b3d8e79e61c149f40"
