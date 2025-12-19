@@ -23,7 +23,8 @@ jobs:
             git reset --hard
             git checkout main
             git pull
-            go run bin/extend.go
+            go run bin/plugins.go
+            go run bin/custom.go
             go run bin/translations.go
             cd storefront
             npm i
