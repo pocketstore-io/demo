@@ -50,18 +50,27 @@ After starting the containers, you need to create an admin user to access the Po
 
 ### Using the provided script:
 
+The script supports multiple ways to provide credentials for security:
+
+**1. Interactive prompts (most secure):**
 ```bash
-./bin/create-admin.sh [email] [password]
+./bin/create-admin.sh
+# You'll be prompted for email and password
 ```
 
-**Examples:**
-
+**2. Command-line arguments (quick, less secure):**
 ```bash
-# Using default credentials (admin@example.com / admin123456)
-./bin/create-admin.sh
-
-# Using custom credentials
 ./bin/create-admin.sh admin@yourdomain.com your_secure_password
+```
+
+**3. Environment variables (secure):**
+```bash
+ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=your_secure_password ./bin/create-admin.sh
+```
+
+**4. Using stdin (secure for scripts):**
+```bash
+echo "your_secure_password" | ADMIN_EMAIL=admin@example.com ./bin/create-admin.sh
 ```
 
 **Note:** The password must be at least 10 characters long.
@@ -71,7 +80,7 @@ After starting the containers, you need to create an admin user to access the Po
 Alternatively, you can create an admin user directly using docker exec:
 
 ```bash
-docker exec -it pb_test pocketbase superuser create admin@example.com your_password
+docker exec -i pb_test pocketbase superuser create admin@example.com your_password
 ```
 
 ### Accessing the Admin Panel:

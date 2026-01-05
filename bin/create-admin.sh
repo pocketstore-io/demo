@@ -2,34 +2,63 @@
 
 # Script to create a PocketBase admin/superuser
 # Usage: ./bin/create-admin.sh [email] [password]
+#
+# For better security, you can also use environment variables:
+# ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=your_password ./bin/create-admin.sh
+#
+# Or use stdin:
+# echo "your_password" | ADMIN_EMAIL=admin@example.com ./bin/create-admin.sh
 
 set -e
 
-# Default values
-DEFAULT_EMAIL="admin@example.com"
-DEFAULT_PASSWORD="admin123456"
+# Get email from argument or environment variable
+ADMIN_EMAIL="${1:-${ADMIN_EMAIL:-}}"
 
-# Get email and password from arguments or use defaults
-ADMIN_EMAIL="${1:-$DEFAULT_EMAIL}"
-ADMIN_PASSWORD="${2:-$DEFAULT_PASSWORD}"
+# Get password from argument, environment variable, or stdin
+if [ -n "$2" ]; then
+    ADMIN_PASSWORD="$2"
+elif [ -n "$ADMIN_PASSWORD" ]; then
+    # Password already set from environment
+    :
+elif [ ! -t 0 ]; then
+    # Read from stdin if available (non-interactive)
+    read -r ADMIN_PASSWORD
+else
+    # Prompt for credentials if not provided
+    if [ -z "$ADMIN_EMAIL" ]; then
+        read -p "Enter admin email: " ADMIN_EMAIL
+    fi
+    read -s -p "Enter admin password (min 10 characters): " ADMIN_PASSWORD
+    echo
+fi
 
-# Validate email format
-if [[ ! "$ADMIN_EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
-    echo "Error: Invalid email format"
+# Validate email
+if [ -z "$ADMIN_EMAIL" ]; then
+    echo "Error: Email is required"
     echo "Usage: $0 [email] [password]"
+    echo "Or: ADMIN_EMAIL=email ADMIN_PASSWORD=password $0"
     exit 1
 fi
 
-# Validate password length (minimum 10 characters for PocketBase)
+if [[ ! "$ADMIN_EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+    echo "Error: Invalid email format"
+    exit 1
+fi
+
+# Validate password
+if [ -z "$ADMIN_PASSWORD" ]; then
+    echo "Error: Password is required"
+    exit 1
+fi
+
 if [ ${#ADMIN_PASSWORD} -lt 10 ]; then
     echo "Error: Password must be at least 10 characters long"
-    echo "Usage: $0 [email] [password]"
     exit 1
 fi
 
 echo "=== Creating PocketBase Admin User ==="
 echo "Email: $ADMIN_EMAIL"
-echo "Password: $(echo $ADMIN_PASSWORD | sed 's/./*/g')"
+echo "Password: ${ADMIN_PASSWORD//?/*}"
 echo ""
 
 # Get the PocketBase container name from environment or use default
@@ -44,7 +73,7 @@ fi
 
 # Create the superuser using docker exec
 echo "Creating admin user..."
-docker exec -it "$CONTAINER_NAME" pocketbase superuser create "$ADMIN_EMAIL" "$ADMIN_PASSWORD"
+docker exec -i "$CONTAINER_NAME" pocketbase superuser create "$ADMIN_EMAIL" "$ADMIN_PASSWORD"
 
 echo ""
 echo "=== Admin User Created Successfully ==="
