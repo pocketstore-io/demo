@@ -22,7 +22,7 @@ elif [ -n "$ADMIN_PASSWORD" ]; then
     :
 elif [ ! -t 0 ]; then
     # Read from stdin if available (non-interactive)
-    read -r -s ADMIN_PASSWORD
+    read -r ADMIN_PASSWORD
 else
     # Prompt for credentials if not provided
     if [ -z "$ADMIN_EMAIL" ]; then
