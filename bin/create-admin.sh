@@ -22,7 +22,7 @@ elif [ -n "$ADMIN_PASSWORD" ]; then
     :
 elif [ ! -t 0 ]; then
     # Read from stdin if available (non-interactive)
-    read -r ADMIN_PASSWORD
+    read -r -s ADMIN_PASSWORD
 else
     # Prompt for credentials if not provided
     if [ -z "$ADMIN_EMAIL" ]; then
@@ -72,6 +72,7 @@ if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
 fi
 
 # Create the superuser using docker exec
+# Note: PocketBase requires both email and password as command arguments
 echo "Creating admin user..."
 docker exec -i "$CONTAINER_NAME" pocketbase superuser create "$ADMIN_EMAIL" "$ADMIN_PASSWORD"
 

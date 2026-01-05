@@ -52,26 +52,27 @@ After starting the containers, you need to create an admin user to access the Po
 
 The script supports multiple ways to provide credentials for security:
 
-**1. Interactive prompts (most secure):**
+**1. Interactive prompts (most secure - recommended):**
 ```bash
 ./bin/create-admin.sh
 # You'll be prompted for email and password
 ```
 
-**2. Command-line arguments (quick, less secure):**
-```bash
-./bin/create-admin.sh admin@yourdomain.com your_secure_password
-```
-
-**3. Environment variables (secure):**
+**2. Environment variables (secure for automation):**
 ```bash
 ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=your_secure_password ./bin/create-admin.sh
 ```
 
-**4. Using stdin (secure for scripts):**
+**3. Using stdin (secure for scripts):**
 ```bash
 echo "your_secure_password" | ADMIN_EMAIL=admin@example.com ./bin/create-admin.sh
 ```
+
+**4. Command-line arguments (⚠️ NOT recommended for production):**
+```bash
+./bin/create-admin.sh admin@yourdomain.com your_secure_password
+```
+> **Warning:** Using command-line arguments exposes credentials in shell history and process lists. Use this method only for local development.
 
 **Note:** The password must be at least 10 characters long.
 
