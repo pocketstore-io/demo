@@ -44,6 +44,42 @@ cd demo
 docker compose up
 ```
 
+## Creating a PocketBase Admin User
+
+After starting the containers, you need to create an admin user to access the PocketBase admin panel.
+
+### Using the provided script:
+
+```bash
+./bin/create-admin.sh [email] [password]
+```
+
+**Examples:**
+
+```bash
+# Using default credentials (admin@example.com / admin123456)
+./bin/create-admin.sh
+
+# Using custom credentials
+./bin/create-admin.sh admin@yourdomain.com your_secure_password
+```
+
+**Note:** The password must be at least 10 characters long.
+
+### Manual creation:
+
+Alternatively, you can create an admin user directly using docker exec:
+
+```bash
+docker exec -it pb_test pocketbase superuser create admin@example.com your_password
+```
+
+### Accessing the Admin Panel:
+
+Once the admin user is created, you can access the PocketBase admin panel at:
+- Local: `http://localhost:8090/_/`
+- Production: `http://admin.pocketstore.io/_/`
+
 This is our Demo Template for Demo.PocketStore.io
 
 
