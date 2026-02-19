@@ -64,7 +64,7 @@ func (p *PocketstoreConfig) GetExtensions() (map[string]Plugin, error) {
 }
 
 type RemoteExtensions struct {
-	Extensions map[string]Plugin `json:"extension,omitempty"`
+	Store map[string]int `json:"store,omitempty"`
 }
 
 var (
@@ -116,17 +116,19 @@ func readPrio(vendor, name string) int {
 }
 
 // parsePluginURL extracts vendor and name from URLs like:
-// "github.com/pocketstore-io/plugin-image-slider" -> ("pocketstore-io", "image-slider")
-// "github.com/pocketstore-io/reviews" -> ("pocketstore-io", "reviews")
+// "github.com/pocketstore-io/plugin-image-slider" -> ("pocketstore-io", "plugin-image-slider")
+// "pocketstore-io/plugin-reviews" -> ("pocketstore-io", "plugin-reviews")
 func parsePluginURL(url string) (vendor, name string, ok bool) {
 	parts := strings.Split(url, "/")
-	if len(parts) < 3 {
+	if len(parts) < 2 {
 		return "", "", false
 	}
 	vendor = parts[len(parts)-2]
 	name = parts[len(parts)-1]
-	// Remove "plugin-" prefix if present
-	name = strings.TrimPrefix(name, "plugin-")
+	// Ensure "plugin-" prefix is present
+	if !strings.HasPrefix(name, "plugin-") {
+		name = "plugin-" + name
+	}
 	return vendor, name, true
 }
 
@@ -546,7 +548,25 @@ func fetchRemoteExtensions(url string) (map[string]Plugin, error) {
 		return nil, fmt.Errorf("failed to decode extensions from %s: %v", url, err)
 	}
 
-	return remote.Extensions, nil
+	// Convert store map to Plugin objects
+	extensions := make(map[string]Plugin)
+	for key, prio := range remote.Store {
+		vendor, name, ok := parsePluginURL(key)
+		if !ok {
+			fmt.Printf("Warning: invalid plugin key in remote extensions: %s\n", key)
+			continue
+		}
+		// parsePluginURL already ensures "plugin-" prefix
+		pluginKey := vendor + "/" + name
+		extensions[pluginKey] = Plugin{
+			Vendor:  vendor,
+			Name:    name,
+			Version: "latest",
+			Prio:    prio,
+		}
+	}
+
+	return extensions, nil
 }
 
 // fetchExtensions fetches plugins from remote and local sources (Step 1)
