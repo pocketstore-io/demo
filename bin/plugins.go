@@ -627,14 +627,6 @@ func mergePlugins() error {
 		return fmt.Errorf("error fetching extensions: %v", err)
 	}
 
-	// Show which extensions were loaded
-	if len(extensionPlugins) > 0 {
-		fmt.Println("\n📦 Extensions loaded:")
-		for _, ext := range extensionPlugins {
-			fmt.Printf("  • %s/%s (version: %s)\n", ext.Vendor, ext.Name, ext.Version)
-		}
-	}
-
 	baselinePlugins, err := readPluginsFromFile("baseline/plugins.json")
 	if err != nil {
 		return fmt.Errorf("error reading baseline/plugins.json: %v", err)
