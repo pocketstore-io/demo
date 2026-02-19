@@ -71,34 +71,10 @@
   },
   {
     "version": "latest",
-    "name": "plugin-product-tabs",
+    "name": "plugin-catalog-plugin",
     "vendor": "pocketstore-io",
     "prio": 100,
-    "revision": "907d2e0dbe4a916958a211e03103808c932b2cba",
-    "source": "extensions"
-  },
-  {
-    "version": "latest",
-    "name": "plugin-customer",
-    "vendor": "pocketstore-io",
-    "prio": 100,
-    "revision": "2d37c5a74944363fb058617002ffc96f388e43d0",
-    "source": "extensions"
-  },
-  {
-    "version": "latest",
-    "name": "plugin-product-reviews",
-    "vendor": "pocketstore-io",
-    "prio": 100,
-    "revision": "42a4a5dd093989f9edb13635f5cea7e17cc13528",
-    "source": "extensions"
-  },
-  {
-    "version": "0.0.1",
-    "name": "plugin-checkout",
-    "vendor": "pocketstore-io",
-    "prio": 100,
-    "revision": "0.0.1",
+    "revision": "33b94a4e8a2a1c95d456e789a6bc30200ba2329c",
     "source": "extensions"
   },
   {
@@ -107,6 +83,14 @@
     "vendor": "pocketstore-io",
     "prio": 100,
     "revision": "7d68e6e094a021b890d92a2ce62a4932c185c05f",
+    "source": "extensions"
+  },
+  {
+    "version": "latest",
+    "name": "plugin-product-reviews",
+    "vendor": "pocketstore-io",
+    "prio": 100,
+    "revision": "42a4a5dd093989f9edb13635f5cea7e17cc13528",
     "source": "extensions"
   },
   {
@@ -134,11 +118,34 @@
     "source": "extensions"
   },
   {
-    "version": "latest",
-    "name": "plugin-catalog-plugin",
+    "version": "0.0.1",
+    "name": "plugin-checkout",
     "vendor": "pocketstore-io",
     "prio": 100,
-    "revision": "33b94a4e8a2a1c95d456e789a6bc30200ba2329c",
+    "revision": "0.0.1",
     "source": "extensions"
+  },
+  {
+    "version": "latest",
+    "name": "plugin-customer",
+    "vendor": "pocketstore-io",
+    "prio": 100,
+    "revision": "2d37c5a74944363fb058617002ffc96f388e43d0",
+    "source": "extensions"
+  },
+  {
+    "version": "latest",
+    "name": "plugin-product-tabs",
+    "vendor": "pocketstore-io",
+    "prio": 100,
+    "revision": "907d2e0dbe4a916958a211e03103808c932b2cba",
+    "source": "extensions"
+  },
+  {
+    "version": "latest",
+    "name": "plugin-image-slider",
+    "vendor": "pocketstore-io",
+    "revision": "22771aa0c2bed1423002d71634dfcb19915f0011",
+    "source": "pocketstore-io/plugin-product-tabs"
   }
 ]

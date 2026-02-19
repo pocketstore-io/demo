@@ -571,30 +571,48 @@ func fetchRemoteExtensions(url string) (map[string]Plugin, error) {
 
 // fetchExtensions fetches plugins from remote and local sources (Step 1)
 func fetchExtensions() ([]Plugin, error) {
+	// Read local pocketstore config first to check if extensions are disabled
+	data, err := os.ReadFile("custom/pocketstore.json")
+	if err != nil && !os.IsNotExist(err) {
+		return nil, fmt.Errorf("error reading custom/pocketstore.json: %v", err)
+	}
+
+	var extensionsDisabled bool
+	var localExtensions map[string]Plugin
+
+	if len(data) > 0 {
+		var config PocketstoreConfig
+		if err := json.Unmarshal(data, &config); err != nil {
+			return nil, fmt.Errorf("error parsing custom/pocketstore.json: %v", err)
+		}
+
+		// Check if extension is explicitly set to false (boolean)
+		if len(config.ExtensionRaw) > 0 {
+			var boolValue bool
+			if err := json.Unmarshal(config.ExtensionRaw, &boolValue); err == nil && !boolValue {
+				extensionsDisabled = true
+			}
+		}
+
+		localExtensions, err = config.GetExtensions()
+		if err != nil {
+			return nil, fmt.Errorf("error parsing extensions from custom/pocketstore.json: %v", err)
+		}
+	} else {
+		localExtensions = make(map[string]Plugin)
+	}
+
+	// If extensions are explicitly disabled, return empty list
+	if extensionsDisabled {
+		fmt.Println("Extensions disabled in custom/pocketstore.json")
+		return []Plugin{}, nil
+	}
+
 	// Fetch from remote pocketstore
 	remoteExtensions, err := fetchRemoteExtensions("https://plugins.pocketstore.io/extensions.json")
 	if err != nil {
 		fmt.Printf("Warning: failed to fetch remote extensions: %v\n", err)
 		remoteExtensions = make(map[string]Plugin)
-	}
-
-	// Read local pocketstore config
-	var localExtensions map[string]Plugin
-	data, err := os.ReadFile("custom/pocketstore.json")
-	if err != nil {
-		if !os.IsNotExist(err) {
-			return nil, fmt.Errorf("error reading custom/pocketstore.json: %v", err)
-		}
-		localExtensions = make(map[string]Plugin)
-	} else {
-		var config PocketstoreConfig
-		if err := json.Unmarshal(data, &config); err != nil {
-			return nil, fmt.Errorf("error parsing custom/pocketstore.json: %v", err)
-		}
-		localExtensions, err = config.GetExtensions()
-		if err != nil {
-			return nil, fmt.Errorf("error parsing extensions from custom/pocketstore.json: %v", err)
-		}
 	}
 
 	// Merge extensions: local overrides remote
