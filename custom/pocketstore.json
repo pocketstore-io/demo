@@ -7,7 +7,7 @@
     "enabled": false,
     "until": "12.10.2026 12:12:12"
   },
-  "extension": "store",
+  "extension": false,
   "emails": {
     "support": {
       "address": "support@jonathan-martz.de",

@@ -460,7 +460,9 @@ func resolveRequirements(baselinePlugins, customPlugins, storefrontPlugins, exte
 		printTree(baselinePlugins, "baseline/plugins.json")
 		printTree(customPlugins, "custom/plugins.json")
 		printTree(storefrontPlugins, "storefront/plugins.json")
-		printTree(extensionPlugins, "extensions (remote + local)")
+		if len(extensionPlugins) > 0 {
+			printTree(extensionPlugins, "extensions (remote + local)")
+		}
 	}
 
 	// Print summary of plugins installed by extensions
