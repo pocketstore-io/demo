@@ -21,7 +21,7 @@ type Plugin struct {
 	Prio     int    `json:"prio,omitempty"`
 	Revision string `json:"revision,omitempty"` // include revision in installed.json
 	BasePath string `json:"-"`
-	Source   string `json:"-"` // Track source: "baseline", "custom", "storefront", or parent plugin key
+	Source   string `json:"source,omitempty"` // Track source: "baseline", "custom", "storefront", "extensions", or parent plugin key
 }
 
 type PluginJson struct {
@@ -32,7 +32,35 @@ type PluginJson struct {
 }
 
 type PocketstoreConfig struct {
-	Extensions map[string]Plugin `json:"extension,omitempty"`
+	ExtensionRaw json.RawMessage `json:"extension,omitempty"`
+}
+
+func (p *PocketstoreConfig) GetExtensions() (map[string]Plugin, error) {
+	if len(p.ExtensionRaw) == 0 {
+		return make(map[string]Plugin), nil
+	}
+
+	// Try to unmarshal as boolean first
+	var boolValue bool
+	if err := json.Unmarshal(p.ExtensionRaw, &boolValue); err == nil {
+		// If it's a boolean, return empty map
+		return make(map[string]Plugin), nil
+	}
+
+	// Try to unmarshal as string
+	var stringValue string
+	if err := json.Unmarshal(p.ExtensionRaw, &stringValue); err == nil {
+		// If it's a string, return empty map
+		return make(map[string]Plugin), nil
+	}
+
+	// Try to unmarshal as map[string]Plugin
+	var extensions map[string]Plugin
+	if err := json.Unmarshal(p.ExtensionRaw, &extensions); err != nil {
+		return nil, fmt.Errorf("extension field must be boolean, string, or map of plugins: %v", err)
+	}
+
+	return extensions, nil
 }
 
 type RemoteExtensions struct {
@@ -543,9 +571,9 @@ func fetchExtensions() ([]Plugin, error) {
 		if err := json.Unmarshal(data, &config); err != nil {
 			return nil, fmt.Errorf("error parsing custom/pocketstore.json: %v", err)
 		}
-		localExtensions = config.Extensions
-		if localExtensions == nil {
-			localExtensions = make(map[string]Plugin)
+		localExtensions, err = config.GetExtensions()
+		if err != nil {
+			return nil, fmt.Errorf("error parsing extensions from custom/pocketstore.json: %v", err)
 		}
 	}
 
@@ -611,13 +639,56 @@ func mergePlugins() error {
 	fmt.Printf("Loaded %d plugins from storefront/plugins.json\n", len(storefrontPlugins))
 	fmt.Printf("Loaded %d plugins from extensions\n", len(extensionPlugins))
 
+	// List all extensions
+	if len(extensionPlugins) > 0 {
+		for _, ext := range extensionPlugins {
+			fmt.Printf("  • %s/%s (version: %s)\n", ext.Vendor, ext.Name, ext.Version)
+		}
+	}
+
 	// Resolve all requirements recursively, including extension plugins
 	resolved, err := resolveRequirements(baselinePlugins, customPlugins, storefrontPlugins, extensionPlugins)
 	if err != nil {
 		return fmt.Errorf("error resolving requirements: %v", err)
 	}
 
+	// Count and list plugins installed by extensions (including their dependencies)
+	extensionInstalledCount := 0
+	extensionDepsMap := make(map[string][]string)
+
+	// Build map of extension -> dependencies
+	for _, ext := range extensionPlugins {
+		extKey := ext.Vendor + "/" + ext.Name
+		for _, p := range resolved {
+			if p.Source == extKey {
+				extensionDepsMap[extKey] = append(extensionDepsMap[extKey], p.Vendor+"/"+p.Name)
+				extensionInstalledCount++
+			} else if p.Source == "extensions" && p.Vendor+"/"+p.Name == extKey {
+				extensionInstalledCount++
+			}
+		}
+	}
+
+	// Display plugins by extension
+	if len(extensionPlugins) > 0 {
+		fmt.Println("\n==> Plugins by extension:")
+		for _, ext := range extensionPlugins {
+			extKey := ext.Vendor + "/" + ext.Name
+			fmt.Printf("\n🔌 %s:\n", extKey)
+			if deps, exists := extensionDepsMap[extKey]; exists && len(deps) > 0 {
+				for _, dep := range deps {
+					fmt.Printf("  → %s\n", dep)
+				}
+			} else {
+				fmt.Printf("  (no additional dependencies)\n")
+			}
+		}
+	}
+
 	fmt.Printf("\nTotal plugins after resolving requirements: %d\n", len(resolved))
+	if extensionInstalledCount > len(extensionPlugins) {
+		fmt.Printf("  • %d from extensions (including %d dependencies)\n", extensionInstalledCount, extensionInstalledCount-len(extensionPlugins))
+	}
 
 	out, err := json.MarshalIndent(resolved, "", "  ")
 	if err != nil {
