@@ -751,7 +751,9 @@ func installPlugins() error {
 		// Don't check if latest exists, just try to download it
 		plugin.Version = pluginVersion
 
-		url := fmt.Sprintf("https://download.pocketstore.io/d/plugins/%s/%s/%s.zip", plugin.Vendor, plugin.Name, pluginVersion)
+		// Strip "plugin-" prefix from name for download URL
+		pluginNameForDownload := strings.TrimPrefix(plugin.Name, "plugin-")
+		url := fmt.Sprintf("https://download.pocketstore.io/d/plugins/%s/%s/%s.zip", plugin.Vendor, pluginNameForDownload, pluginVersion)
 		zipPath := filepath.Join(cacheDir, fmt.Sprintf("%s-%s-%s.zip", plugin.Vendor, plugin.Name, pluginVersion))
 		destDir := filepath.Join(".plugins", "repos", plugin.Vendor, plugin.Name)
 
